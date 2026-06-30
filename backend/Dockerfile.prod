@@ -30,8 +30,8 @@ COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nestjs:nodejs /app/src/modules/pdf/templates ./dist/modules/pdf/templates
-COPY --chown=nestjs:nodejs start.sh ./start.sh
-RUN chmod +x start.sh
+COPY start.sh ./start.sh
+RUN chmod +x start.sh && chown -R nestjs:nodejs /app/node_modules/@prisma /app/node_modules/.prisma
 
 USER nestjs
 
