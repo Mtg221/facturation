@@ -146,12 +146,6 @@ async function bootstrap() {
   // Trust proxy and handle X-Forwarded-Proto for secure cookies behind proxy
   const expressApp = app.getHttpAdapter().getInstance();
   expressApp.set('trust proxy', 1);
-  app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] === 'https' || req.headers['x-forwarded-ssl'] === 'on') {
-      req.secure = true;
-    }
-    next();
-  });
 
   // CSRF Protection (Double Submit Cookie Pattern)
   // Only apply to state-changing methods, exclude auth endpoints
