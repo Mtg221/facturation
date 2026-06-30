@@ -135,8 +135,7 @@ async function bootstrap() {
       noSniff: true,
       xssFilter: true,
       frameguard: { action: 'sameorigin' },
-      permittedCrossDomainPolicies: { policy: 'none' },
-      expectCt: { maxAge: 86400, enforce: true },
+      permittedCrossDomainPolicies: false,
     }),
   );
 
@@ -148,7 +147,8 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
 
   // Trust proxy and handle X-Forwarded-Proto for secure cookies behind proxy
-  app.set('trust proxy', 1);
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', 1);
   app.use((req, res, next) => {
     if (req.headers['x-forwarded-proto'] === 'https' || req.headers['x-forwarded-ssl'] === 'on') {
       req.secure = true;
@@ -185,12 +185,12 @@ async function bootstrap() {
   });
 
   // Endpoint to get CSRF token for frontend
-  app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  expressApp.get('/api/csrf-token', csrfProtection, (req: any, res: any) => {
     res.json({ csrfToken: req.csrfToken() });
   });
 
   // Health check endpoint (no prefix, no auth, no CSRF)
-  app.get('/health', (req, res) => {
+  expressApp.get('/health', (_req: any, res: any) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
