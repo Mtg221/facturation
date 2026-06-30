@@ -1,0 +1,15 @@
+export const ROUTES = {
+  LOGIN: '/login',
+  DASHBOARD: '/',
+  CLIENTS: '/clients',
+  CLIENT_DETAIL: '/clients/:id',
+  PRODUITS: '/produits',
+  FACTURES: '/factures',
+  FACTURE_CREATE: '/factures/nouvelle',
+  FACTURE_EDIT: '/factures/:id/modifier',
+  FACTURE_DETAIL: '/factures/:id',
+  PAIEMENTS: '/paiements',
+  USERS: '/utilisateurs',
+  REPORTS: '/rapports',
+  SECTEURS: '/secteurs',
+} as const;

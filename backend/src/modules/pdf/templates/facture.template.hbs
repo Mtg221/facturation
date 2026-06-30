@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: #1a1a1a; }
+  .page { padding: 0; }
+
+  .header { background: #1e3a5f; color: white; padding: 24px 28px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .header .company-name { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+  .header .company-info { font-size: 10px; opacity: 0.85; margin-top: 4px; line-height: 1.6; }
+  .header .invoice-title { text-align: right; }
+  .header .invoice-title h1 { font-size: 28px; font-weight: 300; letter-spacing: 3px; }
+  .header .invoice-title .numero { font-size: 14px; font-weight: 600; margin-top: 4px; }
+
+  .meta { display: flex; justify-content: space-between; padding: 20px 28px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+  .meta-block label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #666; display: block; margin-bottom: 3px; }
+  .meta-block .value { font-size: 12px; font-weight: 600; }
+
+  .addresses { display: flex; justify-content: space-between; padding: 24px 28px; }
+  .address-block { flex: 1; }
+  .address-block + .address-block { margin-left: 40px; }
+  .address-block .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #1e3a5f; font-weight: 700; margin-bottom: 8px; border-bottom: 2px solid #1e3a5f; padding-bottom: 4px; display: inline-block; }
+  .address-block .name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .address-block .info { color: #555; line-height: 1.7; }
+
+  .items { padding: 0 28px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: #1e3a5f; color: white; }
+  thead th { padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  thead th:last-child { text-align: right; }
+  tbody tr:nth-child(even) { background: #f8f9fa; }
+  tbody td { padding: 9px 8px; border-bottom: 1px solid #e8e8e8; font-size: 11px; }
+  tbody td:last-child { text-align: right; font-weight: 500; }
+  tfoot tr { background: transparent; }
+  tfoot td { padding: 6px 8px; font-size: 11px; }
+
+  .totals { display: flex; justify-content: flex-end; padding: 16px 28px 0; }
+  .totals-table { width: 280px; }
+  .totals-table td { padding: 5px 8px; }
+  .totals-table .label-col { color: #555; }
+  .totals-table .amount-col { text-align: right; font-weight: 500; }
+  .totals-table tr.total-ttc { background: #1e3a5f; color: white; border-radius: 4px; }
+  .totals-table tr.total-ttc td { padding: 8px 8px; font-size: 13px; font-weight: 700; }
+  .totals-table tr.solde td { color: #e53e3e; font-weight: 600; }
+
+  .montant-lettres { margin: 20px 28px; padding: 12px 16px; background: #f0f4f8; border-left: 4px solid #1e3a5f; border-radius: 4px; }
+  .montant-lettres .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 4px; }
+  .montant-lettres .value { font-style: italic; font-size: 12px; font-weight: 600; }
+
+  .statut-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .PAYEE { background: #c6f6d5; color: #276749; }
+  .PARTIELLEMENT_PAYEE { background: #fef3c7; color: #92400e; }
+  .ENVOYEE { background: #bee3f8; color: #2b6cb0; }
+  .BROUILLON { background: #e2e8f0; color: #4a5568; }
+  .EN_RETARD { background: #fed7d7; color: #c53030; }
+  .ANNULEE { background: #e2e8f0; color: #718096; }
+
+  .footer { margin-top: 30px; border-top: 1px solid #e0e0e0; padding: 16px 28px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .notes { max-width: 55%; }
+  .notes .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 4px; }
+  .notes .value { font-size: 11px; color: #444; line-height: 1.6; }
+  .footer-right { text-align: right; }
+  .stamp-area { width: 140px; height: 80px; border: 2px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 10px; margin-bottom: 8px; margin-left: auto; }
+  .generated { font-size: 9px; color: #aaa; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div>
+      <div class="company-name">{{company.nom}}</div>
+      <div class="company-info">
+        {{company.adresse}}<br>
+        {{#if company.telephone}}Tél : {{company.telephone}}<br>{{/if}}
+        {{#if company.email}}{{company.email}}<br>{{/if}}
+        {{#if company.ninea}}NINEA : {{company.ninea}}{{/if}}
+        {{#if company.rc}} &nbsp;|&nbsp; RC : {{company.rc}}{{/if}}
+      </div>
+    </div>
+    <div class="invoice-title">
+      <h1>FACTURE</h1>
+      <div class="numero">{{facture.numero}}</div>
+      <div style="margin-top:8px">
+        <span class="statut-badge {{facture.statut}}">{{statutLabel facture.statut}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div class="meta-block">
+      <label>Date d'émission</label>
+      <div class="value">{{formatDate facture.dateEmission}}</div>
+    </div>
+    <div class="meta-block">
+      <label>Date d'échéance</label>
+      <div class="value">{{formatDate facture.dateEcheance}}</div>
+    </div>
+    <div class="meta-block">
+      <label>Établi par</label>
+      <div class="value">{{facture.user.prenom}} {{facture.user.nom}}</div>
+    </div>
+    <div class="meta-block">
+      <label>Statut paiement</label>
+      <div class="value">{{formatMoney facture.montantPaye}} / {{formatMoney facture.montantTTC}} FCFA</div>
+    </div>
+  </div>
+
+  <div class="addresses">
+    <div class="address-block">
+      <div class="label">Émetteur</div>
+      <div class="name">{{company.nom}}</div>
+      <div class="info">
+        {{company.adresse}}<br>
+        {{#if company.telephone}}Tél : {{company.telephone}}<br>{{/if}}
+        {{#if company.ninea}}NINEA : {{company.ninea}}{{/if}}
+      </div>
+    </div>
+    <div class="address-block">
+      <div class="label">Destinataire</div>
+      <div class="name">{{facture.client.nom}}</div>
+      <div class="info">
+        {{#if facture.client.adresse}}{{facture.client.adresse}}<br>{{/if}}
+        {{#if facture.client.ville}}{{facture.client.ville}}{{/if}}
+        {{#if facture.client.pays}}, {{facture.client.pays}}<br>{{/if}}
+        {{#if facture.client.telephone1}}Tél : {{facture.client.telephone1}}<br>{{/if}}
+        {{#if facture.client.email}}{{facture.client.email}}<br>{{/if}}
+        {{#if facture.client.ninea}}NINEA : {{facture.client.ninea}}{{/if}}
+      </div>
+    </div>
+  </div>
+
+  <div class="items">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40%">Désignation</th>
+          <th style="text-align:center;width:8%">Qté</th>
+          <th style="text-align:right;width:14%">Prix unit. HT</th>
+          <th style="text-align:center;width:8%">TVA%</th>
+          <th style="text-align:center;width:8%">Remise%</th>
+          <th style="text-align:right;width:12%">Montant HT</th>
+          <th style="text-align:right;width:10%">Total TTC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each facture.details}}
+        <tr>
+          <td>{{this.designation}}</td>
+          <td style="text-align:center">{{this.quantite}}</td>
+          <td style="text-align:right">{{formatMoney this.prixUnitaire}}</td>
+          <td style="text-align:center">{{this.tva}}%</td>
+          <td style="text-align:center">{{this.remise}}%</td>
+          <td style="text-align:right">{{formatMoney this.montantHT}}</td>
+          <td style="text-align:right">{{formatMoney this.montantTTC}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="totals">
+    <table class="totals-table">
+      <tr>
+        <td class="label-col">Sous-total HT</td>
+        <td class="amount-col">{{formatMoney facture.montantHT}} FCFA</td>
+      </tr>
+      {{#if facture.remiseGlobale}}
+      <tr>
+        <td class="label-col">Remise globale ({{facture.remiseGlobale}}%)</td>
+        <td class="amount-col" style="color:#e53e3e">- {{formatMoney (multiply facture.montantHT (multiply facture.remiseGlobale 0.01))}} FCFA</td>
+      </tr>
+      {{/if}}
+      <tr>
+        <td class="label-col">TVA</td>
+        <td class="amount-col">{{formatMoney facture.montantTVA}} FCFA</td>
+      </tr>
+      <tr class="total-ttc">
+        <td>TOTAL TTC</td>
+        <td class="amount-col">{{formatMoney facture.montantTTC}} FCFA</td>
+      </tr>
+      {{#if facture.montantPaye}}
+      <tr>
+        <td class="label-col" style="padding-top:8px">Déjà payé</td>
+        <td class="amount-col" style="padding-top:8px;color:#276749">- {{formatMoney facture.montantPaye}} FCFA</td>
+      </tr>
+      <tr class="solde">
+        <td class="label-col">Solde restant</td>
+        <td class="amount-col">{{formatMoney facture.resteAPayer}} FCFA</td>
+      </tr>
+      {{/if}}
+    </table>
+  </div>
+
+  {{#if facture.montantEnLettres}}
+  <div class="montant-lettres">
+    <div class="label">Arrêtée la présente facture à la somme de</div>
+    <div class="value">{{facture.montantEnLettres}}</div>
+  </div>
+  {{/if}}
+
+  <div class="footer">
+    <div class="notes">
+      {{#if facture.conditionsPaiement}}
+      <div style="margin-bottom:12px">
+        <div class="label">Conditions de paiement</div>
+        <div class="value">{{facture.conditionsPaiement}}</div>
+      </div>
+      {{/if}}
+      {{#if facture.notes}}
+      <div>
+        <div class="label">Notes</div>
+        <div class="value">{{facture.notes}}</div>
+      </div>
+      {{/if}}
+    </div>
+    <div class="footer-right">
+      <div class="stamp-area">Cachet &amp; Signature</div>
+      <div class="generated">Document généré le {{generatedAt}}</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

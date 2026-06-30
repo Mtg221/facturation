@@ -1,0 +1,25 @@
+import * as Joi from 'joi';
+
+export const configValidationSchema = Joi.object({
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  PORT: Joi.number().default(3000),
+  DATABASE_URL: Joi.string().required(),
+  REDIS_URL: Joi.string().required(),
+  JWT_ACCESS_SECRET: Joi.string().min(32).required(),
+  JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+  JWT_ACCESS_EXPIRATION: Joi.string().default('15m'),
+  JWT_REFRESH_EXPIRATION: Joi.string().default('7d'),
+  CORS_ORIGINS: Joi.string().default('http://localhost:5173'),
+  MAIL_HOST: Joi.string().optional(),
+  MAIL_PORT: Joi.number().default(587),
+  MAIL_USER: Joi.string().optional(),
+  MAIL_PASS: Joi.string().optional(),
+  MAIL_FROM: Joi.string().default('Facturation <noreply@facturation.com>'),
+  COMPANY_NAME: Joi.string().default('Ma Société'),
+  COMPANY_ADDRESS: Joi.string().default('Dakar, Sénégal'),
+  COMPANY_PHONE: Joi.string().optional(),
+  COMPANY_EMAIL: Joi.string().optional(),
+  COMPANY_NINEA: Joi.string().optional(),
+  COMPANY_RC: Joi.string().optional(),
+  PII_ENCRYPTION_KEY: Joi.string().min(32).required(),
+});

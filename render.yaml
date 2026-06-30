@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: facturation-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile.prod
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false  # Coller l'URL Neon depuis le dashboard
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: facturation-redis
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRATION
+        value: 15m
+      - key: JWT_REFRESH_EXPIRATION
+        value: 7d
+      - key: CORS_ORIGINS
+        sync: false  # URL Vercel du frontend, ex: https://facturation.vercel.app
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: COMPANY_NAME
+        sync: false
+      - key: COMPANY_ADDRESS
+        sync: false
+      - key: COMPANY_PHONE
+        sync: false
+      - key: COMPANY_EMAIL
+        sync: false
+      - key: COMPANY_NINEA
+        sync: false
+      - key: COMPANY_RC
+        sync: false
+
+  - type: redis
+    name: facturation-redis
+    plan: free
+    ipAllowList: []

@@ -1,0 +1,287 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  COMPTABLE
+  CAISSIER
+  LECTURE
+}
+
+enum StatutFacture {
+  BROUILLON
+  ENVOYEE
+  PARTIELLEMENT_PAYEE
+  PAYEE
+  ANNULEE
+  EN_RETARD
+}
+
+enum ModePaiement {
+  ESPECES
+  VIREMENT
+  CHEQUE
+  CARTE
+  MOBILE_MONEY
+}
+
+enum TypeNotification {
+  FACTURE_CREEE
+  FACTURE_ENVOYEE
+  PAIEMENT_RECU
+  FACTURE_EN_RETARD
+  SYSTEME
+}
+
+// ─── MODELS ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  nom          String
+  prenom       String
+  motDePasse   String
+  role         Role      @default(LECTURE)
+  avatar       String?
+  telephone    String?
+  isActive     Boolean   @default(true)
+  refreshToken String?
+  refreshTokenDevice String?
+  refreshTokenIP     String?
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  factures      Facture[]
+  paiements     Paiement[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+  sessions      UserSession[]
+
+  @@index([email])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model UserSession {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceHash    String
+  ipAddress     String?
+  userAgent     String?
+  refreshToken  String
+  createdAt     DateTime @default(now())
+  lastUsedAt    DateTime @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@map("user_sessions")
+}
+
+model SecteursActivite {
+  id          String    @id @default(cuid())
+  nom         String    @unique
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  clients ClientSecteur[]
+
+  @@index([deletedAt])
+  @@map("secteurs_activite")
+}
+
+model Client {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  nom         String
+  email       String?
+  telephone1  String?
+  telephone2  String?
+  telephone3  String?
+  adresse     String?
+  ville       String?
+  pays        String    @default("Sénégal")
+  localisation String?
+  ninea       String?
+  rc          String?
+  commentaire String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  secteurs ClientSecteur[]
+  factures Facture[]
+
+  @@index([nom])
+  @@index([email])
+  @@index([telephone1])
+  @@index([deletedAt])
+  @@map("clients")
+}
+
+model ClientSecteur {
+  clientId   String
+  secteurId  String
+  assignedAt DateTime @default(now())
+
+  client  Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  secteur SecteursActivite @relation(fields: [secteurId], references: [id], onDelete: Cascade)
+
+  @@id([clientId, secteurId])
+  @@map("client_secteurs")
+}
+
+model Produit {
+  id          String    @id @default(cuid())
+  reference   String    @unique
+  designation String
+  description String?
+  prix        Decimal   @db.Decimal(15, 2)
+  tva         Decimal   @db.Decimal(5, 2) @default(18)
+  unite       String    @default("unité")
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  details DetailFacture[]
+
+  @@index([designation])
+  @@index([deletedAt])
+  @@map("produits")
+}
+
+model Facture {
+  id                 String        @id @default(cuid())
+  numero             String        @unique
+  clientId           String
+  userId             String
+  statut             StatutFacture @default(BROUILLON)
+  dateEmission       DateTime      @default(now())
+  dateEcheance       DateTime
+  notes              String?
+  conditionsPaiement String?
+  remiseGlobale      Decimal       @db.Decimal(5, 2) @default(0)
+  montantHT          Decimal       @db.Decimal(15, 2)
+  montantTVA         Decimal       @db.Decimal(15, 2)
+  montantTTC         Decimal       @db.Decimal(15, 2)
+  montantPaye        Decimal       @db.Decimal(15, 2) @default(0)
+  resteAPayer        Decimal       @db.Decimal(15, 2)
+  montantEnLettres   String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+
+  client    Client          @relation(fields: [clientId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
+  details   DetailFacture[]
+  paiements Paiement[]
+
+  @@index([clientId])
+  @@index([statut])
+  @@index([dateEmission])
+  @@index([dateEcheance])
+  @@index([numero])
+  @@index([deletedAt])
+  @@map("factures")
+}
+
+model DetailFacture {
+  id           String   @id @default(cuid())
+  factureId    String
+  produitId    String?
+  designation  String
+  quantite     Decimal  @db.Decimal(10, 3)
+  prixUnitaire Decimal  @db.Decimal(15, 2)
+  tva          Decimal  @db.Decimal(5, 2) @default(0)
+  remise       Decimal  @db.Decimal(5, 2) @default(0)
+  montantHT    Decimal  @db.Decimal(15, 2)
+  montantTVA   Decimal  @db.Decimal(15, 2)
+  montantTTC   Decimal  @db.Decimal(15, 2)
+  ordre        Int      @default(0)
+
+  facture Facture  @relation(fields: [factureId], references: [id], onDelete: Cascade)
+  produit Produit? @relation(fields: [produitId], references: [id], onDelete: SetNull)
+
+  @@index([factureId])
+  @@map("detail_factures")
+}
+
+model Paiement {
+  id           String       @id @default(cuid())
+  factureId    String
+  userId       String
+  montant      Decimal      @db.Decimal(15, 2)
+  mode         ModePaiement
+  numeroCheque String?
+  banque       String?
+  reference    String?
+  commentaire  String?
+  recuPar      String?
+  payePar      String?
+  datePaiement DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+
+  facture Facture @relation(fields: [factureId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([factureId])
+  @@index([datePaiement])
+  @@map("paiements")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  utilisateur  String?
+  action       String
+  table        String
+  entityId     String?
+  ancienneValeur Json?
+  nouvelleValeur Json?
+  adresseIP    String?
+  navigateur   String?
+  createdAt    DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([table])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      TypeNotification
+  titre     String
+  contenu   String
+  data      Json?
+  lu        Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([lu])
+  @@index([createdAt])
+  @@map("notifications")
+}
