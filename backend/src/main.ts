@@ -49,10 +49,7 @@ function validateCriticalSecrets(configService: ConfigService, logger: any) {
   const criticalSecrets = [
     'JWT_ACCESS_SECRET',
     'JWT_REFRESH_SECRET',
-    'POSTGRES_PASSWORD',
-    'REDIS_PASSWORD',
     'DATABASE_URL',
-    'REDIS_URL',
     'MAIL_USER',
     'MAIL_PASS',
   ];
