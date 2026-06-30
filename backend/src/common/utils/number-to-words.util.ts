@@ -10,9 +10,12 @@ function convertBelow1000(n: number): string {
     const ten = Math.floor(n / 10);
     const one = n % 10;
     if (ten === 7 || ten === 9) {
-      return tens[ten] + (one === 0 ? (ten === 8 ? 's' : '') : '-' + ones[10 + one]);
+      return tens[ten] + (one === 0 ? '' : '-' + ones[10 + one]);
     }
-    return tens[ten] + (one > 0 ? '-' + ones[one] : ten === 8 ? 's' : '');
+    if (ten === 8) {
+      return tens[ten] + (one === 0 ? 's' : '-' + ones[10 + one]);
+    }
+    return tens[ten] + (one > 0 ? '-' + ones[one] : '');
   }
   const hundreds = Math.floor(n / 100);
   const rest = n % 100;

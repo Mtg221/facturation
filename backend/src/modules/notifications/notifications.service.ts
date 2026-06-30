@@ -27,7 +27,7 @@ export class NotificationsService {
   }
 
   async create(dto: CreateNotificationDto) {
-    const notification = await this.prisma.notification.create({ data: dto });
+    const notification = await this.prisma.notification.create({ data: dto as any });
 
     if (this.gateway.emitToUser) {
       this.gateway.emitToUser(dto.userId, notification);
@@ -43,7 +43,7 @@ export class NotificationsService {
     });
 
     await this.prisma.notification.createMany({
-      data: users.map((u) => ({ ...dto, userId: u.id })),
+      data: users.map((u) => ({ ...dto, userId: u.id })) as any,
     });
   }
 

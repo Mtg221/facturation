@@ -1,9 +1,4 @@
-import { zxcvbn, zxcvbnOptions } from 'zxcvbn-ts';
-
-// Load common password dictionaries
-zxcvbnOptions.setOptions({
-  // Add French/common words if needed
-});
+import { zxcvbn } from 'zxcvbn-ts';
 
 export interface PasswordStrengthResult {
   valid: boolean;
@@ -28,7 +23,7 @@ export function validatePasswordStrength(password: string): PasswordStrengthResu
   return {
     valid: result.score >= minScore,
     score: result.score,
-    feedback: result.feedback.suggestions,
-    crackTime: result.crackTimesDisplay.offlineSlowHashing1e4PerSecond,
+    feedback: [...result.feedback.suggestions],
+    crackTime: String((result.crack_times_display as any).offline_slow_hashing_1e4_per_second ?? (result.crack_times_display as any).offline_slow_hashing_1e5_per_second ?? ''),
   };
 }

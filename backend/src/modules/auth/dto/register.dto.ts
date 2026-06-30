@@ -1,7 +1,7 @@
 import { IsEmail, IsString, IsEnum, IsOptional, MinLength, Validate } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { StrongPasswordConstraint } from '../../common/validators/strong-password.validator';
+import { StrongPasswordConstraint } from '../../../common/validators/strong-password.validator';
 
 export class RegisterDto {
   @ApiProperty()

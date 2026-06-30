@@ -66,7 +66,7 @@ export class PdfService {
 
     try {
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
       const buffer = await page.pdf({
         format: 'A4',
@@ -105,7 +105,7 @@ export class PdfService {
       '<': '<',
       '>': '>',
       '"': '"',
-      "'": ''',
+      ["'"]: '&#x27;',
       '/': '&#x2F;',
     };
     return text.replace(/[&<>"'\/]/g, (char) => htmlEntities[char] || char);

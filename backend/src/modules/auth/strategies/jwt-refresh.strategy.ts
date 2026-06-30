@@ -9,7 +9,7 @@ import { JwtPayload } from './jwt.strategy';
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor(private readonly configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromCookie('refreshToken'),
+      jwtFromRequest: (req: Request) => req?.cookies?.refreshToken ?? null,
       secretOrKey: configService.get<string>('JWT_REFRESH_SECRET'),
       passReqToCallback: true,
     });

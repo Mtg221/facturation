@@ -82,5 +82,5 @@ export function paginate<T>(data: T[], total: number, page: number, limit: numbe
 
 // Helper to get validated sort options
 export function getValidatedSortOptions(pagination: PaginationDto): Record<string, 'asc' | 'desc'> {
-  return { [pagination.sortBy]: pagination.sortOrder };
+  return { [pagination.sortBy as string]: pagination.sortOrder } as Record<string, 'asc' | 'desc'>;
 }
