@@ -28,9 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authService
       .getMe()
       .then((userData) => setUser(userData))
-      .catch(() => {
-        localStorage.removeItem('accessToken');
-        setAccessToken(null);
+      .catch(async () => {
+        // Token expiré — tenter un refresh via cookie httpOnly
+        try {
+          const { default: axios } = await import('axios');
+          const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+          const res = await axios.post(`${BASE_URL}/api/v1/auth/refresh`, null, { withCredentials: true });
+          const newToken = res.data.data.accessToken;
+          setAccessToken(newToken);
+          localStorage.setItem('accessToken', newToken);
+          const userData = await authService.getMe();
+          setUser(userData);
+        } catch {
+          localStorage.removeItem('accessToken');
+          setAccessToken(null);
+        }
       })
       .finally(() => setIsLoading(false));
   }, []);
