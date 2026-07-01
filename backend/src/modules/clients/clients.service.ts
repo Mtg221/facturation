@@ -58,9 +58,9 @@ export class ClientsService {
     return paginate(data, total, page, limit);
   }
 
-  async findOne(id: string) {
-    const client = await this.prisma.client.findUnique({
-      where: { id },
+  async findOne(id: string, societeId?: string | null) {
+    const client = await this.prisma.client.findFirst({
+      where: { id, ...(societeId ? { societeId } : {}) },
       include: {
         secteurs: { include: { secteur: true } },
         _count: { select: { factures: true } },
@@ -100,8 +100,8 @@ export class ClientsService {
     return client;
   }
 
-  async update(id: string, dto: UpdateClientDto, actorId: string) {
-    const existing = await this.findOne(id);
+  async update(id: string, dto: UpdateClientDto, actorId: string, societeId?: string | null) {
+    const existing = await this.findOne(id, societeId);
     const { secteurIds, ...clientData } = dto;
 
     const updated = await this.prisma.$transaction(async (tx) => {
@@ -134,8 +134,8 @@ export class ClientsService {
     return updated;
   }
 
-  async remove(id: string, actorId: string) {
-    const client = await this.findOne(id);
+  async remove(id: string, actorId: string, societeId?: string | null) {
+    const client = await this.findOne(id, societeId);
 
     const openInvoices = await this.prisma.facture.count({
       where: {

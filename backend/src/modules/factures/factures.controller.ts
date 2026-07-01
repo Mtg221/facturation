@@ -29,14 +29,14 @@ export class FacturesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'une facture' })
-  findOne(@Param('id') id: string) {
-    return this.facturesService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.facturesService.findOne(id, user.societeId);
   }
 
   @Get(':id/pdf')
   @ApiOperation({ summary: 'Télécharger la facture en PDF' })
   async getPdf(@Param('id') id: string, @Res() res: Response, @CurrentUser() user: RequestUser) {
-    const facture = await this.facturesService.findOne(id);
+    const facture = await this.facturesService.findOne(id, user.societeId);
     const buffer = await this.pdfService.generateFacturePdf(facture, user.societeId);
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -66,13 +66,13 @@ export class FacturesController {
     @Body() dto: Partial<CreateFactureDto>,
     @CurrentUser() user: RequestUser,
   ) {
-    return this.facturesService.update(id, dto, user.id);
+    return this.facturesService.update(id, dto, user.id, user.societeId);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Supprimer une facture (brouillon uniquement)' })
   remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
-    return this.facturesService.remove(id, user.id);
+    return this.facturesService.remove(id, user.id, user.societeId);
   }
 }

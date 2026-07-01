@@ -27,8 +27,8 @@ export class UsersController {
   @Get(':id')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Détail d\'un utilisateur' })
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.usersService.findOne(id, user.societeId);
   }
 
   @Post()
@@ -46,13 +46,13 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
     @CurrentUser() user: RequestUser,
   ) {
-    return this.usersService.update(id, dto, user.id);
+    return this.usersService.update(id, dto, user.id, user.societeId);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Supprimer un utilisateur' })
   remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
-    return this.usersService.remove(id, user.id);
+    return this.usersService.remove(id, user.id, user.societeId);
   }
 }

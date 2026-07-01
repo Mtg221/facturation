@@ -45,9 +45,9 @@ export class PaiementsService {
     return paginate(data, total, page, limit);
   }
 
-  async findOne(id: string) {
-    const paiement = await this.prisma.paiement.findUnique({
-      where: { id },
+  async findOne(id: string, societeId?: string | null) {
+    const paiement = await this.prisma.paiement.findFirst({
+      where: { id, ...(societeId ? { societeId } : {}) },
       include: {
         facture: {
           include: {
@@ -115,8 +115,8 @@ export class PaiementsService {
     return paiement;
   }
 
-  async remove(id: string, userId: string) {
-    const paiement = await this.findOne(id);
+  async remove(id: string, userId: string, societeId?: string | null) {
+    const paiement = await this.findOne(id, societeId);
 
     await this.prisma.paiement.delete({ where: { id } });
 
@@ -134,7 +134,7 @@ export class PaiementsService {
   }
 
   async getRecu(id: string, societeId: string | null = null): Promise<Buffer> {
-    const paiement = await this.findOne(id);
+    const paiement = await this.findOne(id, societeId);
     return this.pdfService.generateRecuPdf(paiement, societeId);
   }
 }

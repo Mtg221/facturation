@@ -76,6 +76,7 @@ export class SocietesService {
 
     const hashedPassword = await hashPassword(dto.motDePasse);
     const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     const user = await this.prisma.user.create({
       data: {
@@ -88,6 +89,7 @@ export class SocietesService {
         isActive: true,
         emailVerified: false,
         emailVerificationToken: verificationToken,
+        emailVerificationTokenExpiry: tokenExpiry,
       },
       select: {
         id: true,

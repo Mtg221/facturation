@@ -35,8 +35,8 @@ export class ClientsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'un client' })
-  findOne(@Param('id') id: string) {
-    return this.clientsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.clientsService.findOne(id, user.societeId);
   }
 
   @Post()
@@ -54,13 +54,13 @@ export class ClientsController {
     @Body() dto: UpdateClientDto,
     @CurrentUser() user: RequestUser,
   ) {
-    return this.clientsService.update(id, dto, user.id);
+    return this.clientsService.update(id, dto, user.id, user.societeId);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Supprimer un client' })
   remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
-    return this.clientsService.remove(id, user.id);
+    return this.clientsService.remove(id, user.id, user.societeId);
   }
 }

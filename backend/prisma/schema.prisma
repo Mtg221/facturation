@@ -85,8 +85,9 @@ model User {
   refreshToken String?
   refreshTokenDevice String?
   refreshTokenIP     String?
-  emailVerified          Boolean   @default(false)
-  emailVerificationToken String?
+  emailVerified               Boolean   @default(false)
+  emailVerificationToken      String?
+  emailVerificationTokenExpiry DateTime?
   lastLogin              DateTime?
   createdAt              DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

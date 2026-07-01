@@ -28,8 +28,8 @@ export class PaiementsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'un paiement' })
-  findOne(@Param('id') id: string) {
-    return this.paiementsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: { societeId?: string | null }) {
+    return this.paiementsService.findOne(id, user?.societeId);
   }
 
   @Get(':id/recu')
@@ -51,7 +51,7 @@ export class PaiementsController {
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE)
   @ApiOperation({ summary: 'Annuler un paiement' })
-  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
-    return this.paiementsService.remove(id, user.id);
+  remove(@Param('id') id: string, @CurrentUser() user: { id: string; societeId?: string | null }) {
+    return this.paiementsService.remove(id, user.id, user.societeId);
   }
 }

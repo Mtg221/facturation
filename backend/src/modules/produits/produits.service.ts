@@ -41,8 +41,10 @@ export class ProduitsService {
     return paginate(data, total, page, limit);
   }
 
-  async findOne(id: string) {
-    const produit = await this.prisma.produit.findUnique({ where: { id } });
+  async findOne(id: string, societeId?: string | null) {
+    const produit = await this.prisma.produit.findFirst({
+      where: { id, ...(societeId ? { societeId } : {}) },
+    });
     if (!produit) throw new NotFoundException('Produit introuvable');
     return produit;
   }
@@ -61,8 +63,8 @@ export class ProduitsService {
     return produit;
   }
 
-  async update(id: string, dto: Partial<CreateProduitDto>, actorId: string) {
-    const existing = await this.findOne(id);
+  async update(id: string, dto: Partial<CreateProduitDto>, actorId: string, societeId?: string | null) {
+    const existing = await this.findOne(id, societeId);
 
     const updated = await this.prisma.produit.update({ where: { id }, data: dto });
 
@@ -78,8 +80,8 @@ export class ProduitsService {
     return updated;
   }
 
-  async remove(id: string, actorId: string) {
-    const existing = await this.findOne(id);
+  async remove(id: string, actorId: string, societeId?: string | null) {
+    const existing = await this.findOne(id, societeId);
 
     await this.prisma.produit.update({
       where: { id },

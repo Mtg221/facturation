@@ -21,8 +21,8 @@ export class ProduitsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Détail d\'un produit' })
-  findOne(@Param('id') id: string) {
-    return this.produitsService.findOne(id);
+  findOne(@Param('id') id: string, @CurrentUser() user: { societeId?: string | null }) {
+    return this.produitsService.findOne(id, user.societeId);
   }
 
   @Post()
@@ -38,15 +38,15 @@ export class ProduitsController {
   update(
     @Param('id') id: string,
     @Body() dto: Partial<CreateProduitDto>,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string; societeId?: string | null },
   ) {
-    return this.produitsService.update(id, dto, user.id);
+    return this.produitsService.update(id, dto, user.id, user.societeId);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Supprimer un produit/service' })
-  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
-    return this.produitsService.remove(id, user.id);
+  remove(@Param('id') id: string, @CurrentUser() user: { id: string; societeId?: string | null }) {
+    return this.produitsService.remove(id, user.id, user.societeId);
   }
 }

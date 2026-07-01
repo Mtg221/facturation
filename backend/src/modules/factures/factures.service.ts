@@ -63,9 +63,9 @@ export class FacturesService {
     return paginate(data, total, page, limit);
   }
 
-  async findOne(id: string) {
-    const facture = await this.prisma.facture.findUnique({
-      where: { id },
+  async findOne(id: string, societeId?: string | null) {
+    const facture = await this.prisma.facture.findFirst({
+      where: { id, ...(societeId ? { societeId } : {}) },
       include: {
         client: { include: { secteurs: { include: { secteur: true } } } },
         user: { select: { id: true, nom: true, prenom: true } },
@@ -139,8 +139,8 @@ export class FacturesService {
     return facture;
   }
 
-  async update(id: string, dto: Partial<CreateFactureDto>, userId: string) {
-    const existing = await this.findOne(id);
+  async update(id: string, dto: Partial<CreateFactureDto>, userId: string, societeId?: string | null) {
+    const existing = await this.findOne(id, societeId);
 
     if (existing.statut !== 'BROUILLON') {
       throw new BadRequestException(
@@ -195,8 +195,8 @@ export class FacturesService {
     });
   }
 
-  async remove(id: string, userId: string) {
-    const facture = await this.findOne(id);
+  async remove(id: string, userId: string, societeId?: string | null) {
+    const facture = await this.findOne(id, societeId);
 
     if (facture.statut !== 'BROUILLON') {
       throw new BadRequestException('Seules les factures en brouillon peuvent être supprimées');
@@ -213,7 +213,7 @@ export class FacturesService {
   }
 
   async duplicate(id: string, userId: string, societeId?: string | null) {
-    const original = await this.findOne(id);
+    const original = await this.findOne(id, societeId);
     const numero = await this.numberService.generateNextNumber(societeId);
 
     const facture = await this.prisma.facture.create({

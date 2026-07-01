@@ -61,9 +61,9 @@ export class UsersService {
     return paginate(data, total, page, limit);
   }
 
-  async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+  async findOne(id: string, societeId?: string | null) {
+    const user = await this.prisma.user.findFirst({
+      where: { id, ...(societeId ? { societeId } : {}) },
       select: {
         id: true,
         email: true,
@@ -123,8 +123,8 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, dto: UpdateUserDto, actorId: string) {
-    const existing = await this.findOne(id);
+  async update(id: string, dto: UpdateUserDto, actorId: string, societeId?: string | null) {
+    const existing = await this.findOne(id, societeId);
 
     const updated = await this.prisma.user.update({
       where: { id },
@@ -153,12 +153,12 @@ export class UsersService {
     return updated;
   }
 
-  async remove(id: string, actorId: string) {
+  async remove(id: string, actorId: string, societeId?: string | null) {
     if (id === actorId) {
       throw new ForbiddenException('Vous ne pouvez pas supprimer votre propre compte');
     }
 
-    await this.findOne(id);
+    await this.findOne(id, societeId);
 
     await this.prisma.user.update({
       where: { id },

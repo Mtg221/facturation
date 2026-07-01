@@ -4,6 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -418,9 +419,13 @@ export class AuthService {
 
     if (!user) throw new NotFoundException('Lien de vérification invalide ou expiré');
 
+    if (user.emailVerificationTokenExpiry && user.emailVerificationTokenExpiry < new Date()) {
+      throw new BadRequestException('Ce lien de vérification a expiré. Contactez votre administrateur pour en obtenir un nouveau.');
+    }
+
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { emailVerified: true, emailVerificationToken: null },
+      data: { emailVerified: true, emailVerificationToken: null, emailVerificationTokenExpiry: null },
     });
 
     return { message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' };
