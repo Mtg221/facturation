@@ -27,7 +27,7 @@ export class FilesService {
           transformation: [{ width: 400, height: 200, crop: 'limit' }],
         },
         (error, result) => {
-          if (error || !result) return reject(new BadRequestException('Erreur upload Cloudinary'));
+          if (error || !result) return reject(new BadRequestException(`Erreur Cloudinary: ${error?.message ?? 'unknown'}`));
           resolve(result.secure_url);
         },
       ).end(file.buffer);
