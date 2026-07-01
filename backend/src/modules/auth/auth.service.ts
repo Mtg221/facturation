@@ -430,4 +430,25 @@ export class AuthService {
 
     return { message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' };
   }
+
+  async setPassword(token: string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { passwordSetToken: token },
+    });
+
+    if (!user) throw new NotFoundException('Lien invalide ou déjà utilisé.');
+
+    if (user.passwordSetTokenExpiry && user.passwordSetTokenExpiry < new Date()) {
+      throw new BadRequestException('Ce lien a expiré. Contactez votre administrateur.');
+    }
+
+    const hashed = await import('../../common/utils/bcrypt.util').then(m => m.hashPassword(newPassword));
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { motDePasse: hashed, passwordSetToken: null, passwordSetTokenExpiry: null },
+    });
+
+    return { message: 'Mot de passe défini avec succès. Vous pouvez maintenant vous connecter.' };
+  }
 }

@@ -102,4 +102,12 @@ export class AuthController {
   verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
   }
+
+  @Public()
+  @Post('set-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Définir son mot de passe via token (premier accès)' })
+  setPassword(@Body() body: { token: string; password: string }) {
+    return this.authService.setPassword(body.token, body.password);
+  }
 }

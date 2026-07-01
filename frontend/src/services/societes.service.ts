@@ -49,7 +49,6 @@ export interface CreateAdminPayload {
   email: string;
   nom: string;
   prenom: string;
-  motDePasse: string;
 }
 
 const societesService = {

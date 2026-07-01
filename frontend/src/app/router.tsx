@@ -4,6 +4,7 @@ import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { VerifyEmailPage } from '../pages/auth/VerifyEmailPage';
+import SetPasswordPage from '../pages/auth/SetPasswordPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ClientsPage } from '../pages/clients/ClientsPage';
 import { ClientDetailPage } from '../pages/clients/ClientDetailPage';
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
   {
     path: '/verify-email',
     element: <VerifyEmailPage />,
+  },
+  {
+    path: '/set-password',
+    element: <SetPasswordPage />,
   },
   // Routes SUPERADMIN
   {

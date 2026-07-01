@@ -74,22 +74,22 @@ export class SocietesService {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email.toLowerCase() } });
     if (existing) throw new ConflictException('Un compte avec cet email existe déjà');
 
-    const hashedPassword = await hashPassword(dto.motDePasse);
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const tempPassword = await hashPassword(crypto.randomBytes(32).toString('hex'));
+    const passwordSetToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
     const user = await this.prisma.user.create({
       data: {
         email: dto.email.toLowerCase(),
         nom: dto.nom,
         prenom: dto.prenom,
-        motDePasse: hashedPassword,
+        motDePasse: tempPassword,
         role: 'ADMIN',
         societeId,
         isActive: true,
-        emailVerified: false,
-        emailVerificationToken: verificationToken,
-        emailVerificationTokenExpiry: tokenExpiry,
+        emailVerified: true,
+        passwordSetToken,
+        passwordSetTokenExpiry: tokenExpiry,
       },
       select: {
         id: true,
@@ -102,11 +102,11 @@ export class SocietesService {
       },
     });
 
-    // Envoi de l'email de vérification (non bloquant)
-    this.mailService.sendVerificationEmail(
+    // Envoi de l'email de définition de mot de passe (non bloquant)
+    this.mailService.sendSetPasswordEmail(
       dto.email.toLowerCase(),
       dto.prenom,
-      verificationToken,
+      passwordSetToken,
     ).catch(() => {});
 
     return user;

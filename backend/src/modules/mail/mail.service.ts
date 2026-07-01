@@ -55,6 +55,36 @@ export class MailService {
     this.logger.log(`Email de vérification envoyé à ${email}`);
   }
 
+  async sendSetPasswordEmail(email: string, prenom: string, token: string) {
+    const frontendUrl = this.configService.get('FRONTEND_URL', 'https://facturation-rust.vercel.app');
+    const setPasswordUrl = `${frontendUrl}/set-password?token=${token}`;
+    const companyName = this.configService.get('COMPANY_NAME', 'Facturation');
+
+    await this.transporter.sendMail({
+      from: this.configService.get('MAIL_FROM'),
+      to: email,
+      subject: `Définissez votre mot de passe — ${companyName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1e3a5f;">Bienvenue, ${prenom} !</h2>
+          <p>Votre compte administrateur a été créé sur la plateforme de facturation.</p>
+          <p>Cliquez sur le bouton ci-dessous pour définir votre mot de passe et accéder à votre espace :</p>
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${setPasswordUrl}"
+               style="background-color: #2563eb; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+              Définir mon mot de passe
+            </a>
+          </div>
+          <p style="color: #6b7280; font-size: 13px;">Ce lien expire dans 48 heures. Si vous n'attendiez pas ce message, ignorez cet email.</p>
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+          <p style="color: #9ca3af; font-size: 12px;">${companyName}</p>
+        </div>
+      `,
+    });
+
+    this.logger.log(`Email de définition de mot de passe envoyé à ${email}`);
+  }
+
   async sendFacture(factureId: string) {
     const facture = await this.prisma.facture.findUnique({
       where: { id: factureId },

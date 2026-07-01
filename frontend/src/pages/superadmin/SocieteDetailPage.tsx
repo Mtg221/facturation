@@ -13,7 +13,7 @@ export default function SocieteDetailPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('infos');
   const [showAdminForm, setShowAdminForm] = useState(false);
-  const [adminForm, setAdminForm] = useState({ email: '', nom: '', prenom: '', motDePasse: '' });
+  const [adminForm, setAdminForm] = useState({ email: '', nom: '', prenom: '' });
   const [form, setForm] = useState<Record<string, string>>({});
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,9 +57,9 @@ export default function SocieteDetailPage() {
   const createAdminMutation = useMutation({
     mutationFn: () => societesService.createAdmin(id!, adminForm),
     onSuccess: () => {
-      toast.success('Admin créé avec succès');
+      toast.success('Admin créé — un email a été envoyé pour définir son mot de passe');
       setShowAdminForm(false);
-      setAdminForm({ email: '', nom: '', prenom: '', motDePasse: '' });
+      setAdminForm({ email: '', nom: '', prenom: '' });
       queryClient.invalidateQueries({ queryKey: ['societe-users', id] });
     },
     onError: () => toast.error('Erreur lors de la création'),
@@ -214,13 +214,7 @@ export default function SocieteDetailPage() {
                   onChange={(e) => setAdminForm((p) => ({ ...p, email: e.target.value }))}
                   className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <input
-                  placeholder="Mot de passe"
-                  type="password"
-                  value={adminForm.motDePasse}
-                  onChange={(e) => setAdminForm((p) => ({ ...p, motDePasse: e.target.value }))}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <p className="text-xs text-gray-500 col-span-2">Un email sera envoyé à l'admin pour qu'il définisse son mot de passe.</p>
               </div>
               <div className="flex gap-2 mt-3">
                 <button

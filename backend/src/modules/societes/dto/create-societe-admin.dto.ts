@@ -11,8 +11,4 @@ export class CreateSocieteAdminDto {
   @IsString()
   @MinLength(2)
   prenom: string;
-
-  @IsString()
-  @MinLength(8)
-  motDePasse: string;
 }
