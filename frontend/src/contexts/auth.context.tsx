@@ -19,12 +19,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Try to restore session via cookie (refreshToken est httpOnly, pas en localStorage)
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+    setAccessToken(token);
     authService
       .getMe()
       .then((userData) => setUser(userData))
       .catch(() => {
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('accessToken');
+        setAccessToken(null);
       })
       .finally(() => setIsLoading(false));
   }, []);
@@ -32,13 +38,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, motDePasse: string) => {
     const response = await authService.login({ email, motDePasse });
     setAccessToken(response.accessToken);
-    if (response.refreshToken) localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem('accessToken', response.accessToken);
     setUser(response.user);
   };
 
   const logout = async () => {
     await authService.logout();
     setUser(null);
+    setAccessToken(null);
+    localStorage.removeItem('accessToken');
   };
 
   return (
