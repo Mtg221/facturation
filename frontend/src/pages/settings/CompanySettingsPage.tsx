@@ -24,7 +24,7 @@ export default function CompanySettingsPage() {
 
   const { data: societe, isLoading } = useQuery({
     queryKey: ['my-societe'],
-    queryFn: () => societesService.findOne(user!.societeId!),
+    queryFn: () => societesService.getMySociete(),
     enabled: !!user?.societeId,
   });
 

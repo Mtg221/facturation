@@ -115,6 +115,11 @@ const societesService = {
     return res.data.data;
   },
 
+  getMySociete: async (): Promise<Societe> => {
+    const res = await api.get('/societes/me/infos');
+    return res.data.data;
+  },
+
   updateMySociete: async (payload: Partial<CreateSocietePayload>): Promise<Societe> => {
     const res = await api.patch('/societes/me/infos', payload);
     return res.data.data;

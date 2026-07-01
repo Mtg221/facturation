@@ -102,6 +102,13 @@ export class SocietesController {
 
   // ── ADMIN (company-level) endpoints ───────────────────────────────────────
 
+  @Get('me/infos')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE, Role.CAISSIER, Role.LECTURE)
+  getMySociete(@Request() req: { user: RequestUser }) {
+    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
+    return this.societesService.findOne(req.user.societeId);
+  }
+
   @Patch('me/infos')
   @Roles(Role.ADMIN)
   updateMySociete(@Request() req: { user: RequestUser }, @Body() dto: UpdateSocieteDto) {
