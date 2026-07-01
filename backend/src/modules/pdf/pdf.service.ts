@@ -26,6 +26,7 @@ export class PdfService {
       email: this.configService.get('COMPANY_EMAIL', ''),
       ninea: this.configService.get('COMPANY_NINEA', ''),
       rc: this.configService.get('COMPANY_RC', ''),
+      banque: this.configService.get('COMPANY_BANK', ''),
     });
 
     const html = compiled({

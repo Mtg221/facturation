@@ -57,7 +57,9 @@
   .EN_RETARD { background: #fed7d7; color: #c53030; }
   .ANNULEE { background: #e2e8f0; color: #718096; }
 
-  .footer { margin-top: 30px; border-top: 1px solid #e0e0e0; padding: 16px 28px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .bank-info { margin: 0 28px; padding: 10px 16px; background: #f0f4f8; border-left: 4px solid #1e3a5f; border-radius: 4px; font-size: 10px; color: #444; }
+  .bank-info .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 3px; }
+  .footer { margin-top: 16px; border-top: 1px solid #e0e0e0; padding: 16px 28px; display: flex; justify-content: space-between; align-items: flex-end; }
   .notes { max-width: 55%; }
   .notes .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 4px; }
   .notes .value { font-size: 11px; color: #444; line-height: 1.6; }
@@ -76,8 +78,8 @@
         {{company.adresse}}<br>
         {{#if company.telephone}}Tél : {{company.telephone}}<br>{{/if}}
         {{#if company.email}}{{company.email}}<br>{{/if}}
-        {{#if company.ninea}}NINEA : {{company.ninea}}{{/if}}
-        {{#if company.rc}} &nbsp;|&nbsp; RC : {{company.rc}}{{/if}}
+        {{#if company.rc}}RCCM : {{company.rc}}{{/if}}
+        {{#if company.ninea}} &nbsp;|&nbsp; NINEA : {{company.ninea}}{{/if}}
       </div>
     </div>
     <div class="invoice-title">
@@ -198,6 +200,13 @@
   <div class="montant-lettres">
     <div class="label">Arrêtée la présente facture à la somme de</div>
     <div class="value">{{facture.montantEnLettres}}</div>
+  </div>
+  {{/if}}
+
+  {{#if company.banque}}
+  <div class="bank-info">
+    <div class="label">Coordonnées bancaires</div>
+    <strong>{{company.banque}}</strong>
   </div>
   {{/if}}
 
