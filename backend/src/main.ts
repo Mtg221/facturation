@@ -95,6 +95,16 @@ async function bootstrap() {
   const corsOrigins = corsOriginsEnv || 'https://facturation-rust.vercel.app,http://localhost:5173';
   const isProduction = configService.get<string>('NODE_ENV') === 'production';
 
+  // CORS must be enabled FIRST before any middleware or route registration
+  app.enableCors({
+    origin: validateCorsOrigins(corsOrigins),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 86400,
+  });
+
   // Validate critical secrets are not using default/placeholder values
   if (isProduction) {
     validateCriticalSecrets(configService, logger);
@@ -184,16 +194,6 @@ async function bootstrap() {
   // Health check endpoint (no prefix, no auth, no CSRF)
   expressApp.get('/health', (_req: any, res: any) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
-
-  // Strict CORS validation
-  app.enableCors({
-    origin: validateCorsOrigins(corsOrigins),
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
-    exposedHeaders: ['Set-Cookie'],
-    maxAge: 86400, // 24 hours
   });
 
   app.setGlobalPrefix('api');
