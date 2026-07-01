@@ -12,6 +12,7 @@ async function main() {
     'comptable@facturation.com',
     'manager@facturation.com',
     'caissier@facturation.com',
+    'superadmin@plateforme.sn',
   ];
   const disabled = await prisma.user.updateMany({
     where: { email: { in: demoEmails } },
@@ -36,13 +37,13 @@ async function main() {
   });
   console.log('✅ Société:', societe.nom);
 
-  const superAdminPassword = await bcrypt.hash('SuperREDACTED', 12);
+  const superAdminPassword = await bcrypt.hash('REDACTED', 12);
   const superAdmin = await prisma.user.upsert({
-    where: { email: 'superadmin@plateforme.sn' },
-    update: { emailVerified: true },
+    where: { email: 'asstallfils@gmail.com' },
+    update: { emailVerified: true, motDePasse: superAdminPassword },
     create: {
-      email: 'superadmin@plateforme.sn',
-      nom: 'Super',
+      email: 'asstallfils@gmail.com',
+      nom: 'Makhemout',
       prenom: 'Admin',
       motDePasse: superAdminPassword,
       role: 'SUPERADMIN',
