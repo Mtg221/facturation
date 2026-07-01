@@ -37,7 +37,9 @@ async function main() {
   });
   console.log('✅ Société:', societe.nom);
 
-  const superAdminPassword = await bcrypt.hash('REDACTED', 12);
+  const superAdminRawPassword = process.env.SEED_SUPERADMIN_PASSWORD;
+  if (!superAdminRawPassword) throw new Error('SEED_SUPERADMIN_PASSWORD env var is required');
+  const superAdminPassword = await bcrypt.hash(superAdminRawPassword, 12);
   const superAdmin = await prisma.user.upsert({
     where: { email: 'asstallfils@gmail.com' },
     update: { emailVerified: true, motDePasse: superAdminPassword },
@@ -53,7 +55,9 @@ async function main() {
   });
   console.log('✅ SUPERADMIN:', superAdmin.email);
 
-  const adminPassword = await bcrypt.hash('REDACTED', 12);
+  const adminRawPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!adminRawPassword) throw new Error('SEED_ADMIN_PASSWORD env var is required');
+  const adminPassword = await bcrypt.hash(adminRawPassword, 12);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@2mlogistique.sn' },
     update: { emailVerified: true },
