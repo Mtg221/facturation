@@ -236,6 +236,10 @@ export class AuthService {
         isActive: true,
         lastLogin: true,
         createdAt: true,
+        societeId: true,
+        societe: {
+          select: { id: true, nom: true, logoUrl: true },
+        },
       },
     });
 
@@ -383,7 +387,11 @@ export class AuthService {
   }
 
   private async generateTokens(userId: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = { sub: userId };
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true, societeId: true },
+    });
+    const payload = { sub: userId, role: user?.role, societeId: user?.societeId ?? null };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

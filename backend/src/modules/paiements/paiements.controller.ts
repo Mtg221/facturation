@@ -33,8 +33,8 @@ export class PaiementsController {
 
   @Get(':id/recu')
   @ApiOperation({ summary: 'Télécharger le reçu de paiement en PDF' })
-  async getRecu(@Param('id') id: string, @Res() res: Response) {
-    const buffer = await this.paiementsService.getRecu(id);
+  async getRecu(@Param('id') id: string, @Res() res: Response, @CurrentUser() user: { societeId?: string }) {
+    const buffer = await this.paiementsService.getRecu(id, user?.societeId ?? null);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="recu-${id}.pdf"`);
     res.send(buffer);

@@ -11,6 +11,7 @@ datasource db {
 // ─── ENUMS ────────────────────────────────────────────────────────────────────
 
 enum Role {
+  SUPERADMIN
   ADMIN
   MANAGER
   COMPTABLE
@@ -45,6 +46,32 @@ enum TypeNotification {
 
 // ─── MODELS ───────────────────────────────────────────────────────────────────
 
+model Societe {
+  id        String    @id @default(cuid())
+  nom       String
+  adresse   String?
+  telephone String?
+  email     String?
+  ninea     String?
+  rc        String?
+  banque    String?
+  logoUrl   String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users     User[]
+  clients   Client[]
+  produits  Produit[]
+  factures  Facture[]
+  paiements Paiement[]
+  secteurs  SecteursActivite[]
+
+  @@index([deletedAt])
+  @@map("societes")
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -63,6 +90,9 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
+  societeId    String?
+  societe      Societe?  @relation(fields: [societeId], references: [id])
+
   factures      Facture[]
   paiements     Paiement[]
   auditLogs     AuditLog[]
@@ -71,6 +101,7 @@ model User {
 
   @@index([email])
   @@index([deletedAt])
+  @@index([societeId])
   @@map("users")
 }
 
@@ -94,22 +125,26 @@ model UserSession {
 
 model SecteursActivite {
   id          String    @id @default(cuid())
-  nom         String    @unique
+  nom         String
   description String?
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
+  societeId   String?
+  societe     Societe?  @relation(fields: [societeId], references: [id])
+
   clients ClientSecteur[]
 
   @@index([deletedAt])
+  @@index([societeId])
   @@map("secteurs_activite")
 }
 
 model Client {
   id          String    @id @default(cuid())
-  code        String    @unique
+  code        String
   nom         String
   email       String?
   telephone1  String?
@@ -127,13 +162,18 @@ model Client {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
+  societeId   String?
+  societe     Societe?  @relation(fields: [societeId], references: [id])
+
   secteurs ClientSecteur[]
   factures Facture[]
 
+  @@unique([societeId, code])
   @@index([nom])
   @@index([email])
   @@index([telephone1])
   @@index([deletedAt])
+  @@index([societeId])
   @@map("clients")
 }
 
@@ -151,7 +191,7 @@ model ClientSecteur {
 
 model Produit {
   id          String    @id @default(cuid())
-  reference   String    @unique
+  reference   String
   designation String
   description String?
   prix        Decimal   @db.Decimal(15, 2)
@@ -162,16 +202,21 @@ model Produit {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
+  societeId   String?
+  societe     Societe?  @relation(fields: [societeId], references: [id])
+
   details DetailFacture[]
 
+  @@unique([societeId, reference])
   @@index([designation])
   @@index([deletedAt])
+  @@index([societeId])
   @@map("produits")
 }
 
 model Facture {
   id                 String        @id @default(cuid())
-  numero             String        @unique
+  numero             String
   clientId           String
   userId             String
   statut             StatutFacture @default(BROUILLON)
@@ -190,17 +235,22 @@ model Facture {
   updatedAt          DateTime      @updatedAt
   deletedAt          DateTime?
 
+  societeId   String?
+  societe     Societe?  @relation(fields: [societeId], references: [id])
+
   client    Client          @relation(fields: [clientId], references: [id])
   user      User            @relation(fields: [userId], references: [id])
   details   DetailFacture[]
   paiements Paiement[]
 
+  @@unique([societeId, numero])
   @@index([clientId])
   @@index([statut])
   @@index([dateEmission])
   @@index([dateEcheance])
   @@index([numero])
   @@index([deletedAt])
+  @@index([societeId])
   @@map("factures")
 }
 
@@ -240,32 +290,38 @@ model Paiement {
   datePaiement DateTime     @default(now())
   createdAt    DateTime     @default(now())
 
+  societeId   String?
+  societe     Societe?  @relation(fields: [societeId], references: [id])
+
   facture Facture @relation(fields: [factureId], references: [id])
   user    User    @relation(fields: [userId], references: [id])
 
   @@index([factureId])
   @@index([datePaiement])
+  @@index([societeId])
   @@map("paiements")
 }
 
 model AuditLog {
-  id           String   @id @default(cuid())
-  userId       String?
-  utilisateur  String?
-  action       String
-  table        String
-  entityId     String?
+  id             String   @id @default(cuid())
+  userId         String?
+  utilisateur    String?
+  action         String
+  table          String
+  entityId       String?
   ancienneValeur Json?
   nouvelleValeur Json?
-  adresseIP    String?
-  navigateur   String?
-  createdAt    DateTime @default(now())
+  adresseIP      String?
+  navigateur     String?
+  societeId      String?
+  createdAt      DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([table])
   @@index([createdAt])
+  @@index([societeId])
   @@map("audit_logs")
 }
 

@@ -130,8 +130,8 @@ export class PaiementsService {
     return { message: 'Paiement annulé' };
   }
 
-  async getRecu(id: string): Promise<Buffer> {
+  async getRecu(id: string, societeId: string | null = null): Promise<Buffer> {
     const paiement = await this.findOne(id);
-    return this.pdfService.generateRecuPdf(paiement);
+    return this.pdfService.generateRecuPdf(paiement, societeId);
   }
 }

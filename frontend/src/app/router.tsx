@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
+import { SuperAdminLayout } from '../layouts/SuperAdminLayout';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
@@ -14,16 +15,37 @@ import { UsersPage } from '../pages/users/UsersPage';
 import { ReportsPage } from '../pages/reports/ReportsPage';
 import { SecteursPage } from '../pages/SecteursPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
+import SuperAdminDashboardPage from '../pages/superadmin/SuperAdminDashboardPage';
+import SocietesListPage from '../pages/superadmin/SocietesListPage';
+import SocieteCreatePage from '../pages/superadmin/SocieteCreatePage';
+import SocieteDetailPage from '../pages/superadmin/SocieteDetailPage';
+import CompanySettingsPage from '../pages/settings/CompanySettingsPage';
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
   },
+  // Routes SUPERADMIN
+  {
+    path: '/superadmin',
+    element: (
+      <ProtectedRoute allowedRoles={['SUPERADMIN']}>
+        <SuperAdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <SuperAdminDashboardPage /> },
+      { path: 'societes', element: <SocietesListPage /> },
+      { path: 'societes/nouvelle', element: <SocieteCreatePage /> },
+      { path: 'societes/:id', element: <SocieteDetailPage /> },
+    ],
+  },
+  // Routes company (tous les autres rôles)
   {
     path: '/',
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'COMPTABLE', 'CAISSIER', 'LECTURE']}>
         <AppLayout />
       </ProtectedRoute>
     ),
@@ -39,6 +61,7 @@ export const router = createBrowserRouter([
       { path: 'utilisateurs', element: <UsersPage /> },
       { path: 'rapports', element: <ReportsPage /> },
       { path: 'secteurs', element: <SecteursPage /> },
+      { path: 'parametres/societe', element: <CompanySettingsPage /> },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

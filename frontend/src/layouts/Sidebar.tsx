@@ -17,6 +17,7 @@ const navItems = [
   { to: ROUTES.REPORTS, icon: BarChart3, label: 'Rapports' },
   { to: ROUTES.SECTEURS, icon: Building2, label: 'Secteurs' },
   { to: ROUTES.USERS, icon: Users, label: 'Utilisateurs', adminOnly: true },
+  { to: ROUTES.COMPANY_SETTINGS, icon: Settings, label: 'Ma société', adminOnly: true },
 ];
 
 interface SidebarProps {
@@ -38,7 +39,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         {!collapsed && (
           <div>
-            <div className="font-bold text-lg tracking-wide">Facturation</div>
+            <div className="font-bold text-lg tracking-wide truncate">
+              {user?.societe?.nom ?? 'Facturation'}
+            </div>
             <div className="text-xs text-white/60">Plateforme de gestion</div>
           </div>
         )}

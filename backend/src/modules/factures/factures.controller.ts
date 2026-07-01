@@ -34,9 +34,9 @@ export class FacturesController {
 
   @Get(':id/pdf')
   @ApiOperation({ summary: 'Télécharger la facture en PDF' })
-  async getPdf(@Param('id') id: string, @Res() res: Response) {
+  async getPdf(@Param('id') id: string, @Res() res: Response, @CurrentUser() user: { societeId?: string }) {
     const facture = await this.facturesService.findOne(id);
-    const buffer = await this.pdfService.generateFacturePdf(facture);
+    const buffer = await this.pdfService.generateFacturePdf(facture, user?.societeId ?? null);
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(

@@ -4,22 +4,28 @@ import * as Handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as puppeteer from 'puppeteer';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PdfService {
   private readonly logger = new Logger(PdfService.name);
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
     this.registerHelpers();
   }
 
-  async generateFacturePdf(facture: Record<string, unknown>): Promise<Buffer> {
-    const templatePath = path.join(__dirname, 'templates', 'facture.template.hbs');
-    const template = fs.readFileSync(templatePath, 'utf-8');
-    const compiled = Handlebars.compile(template);
-
-    const safeFacture = this.sanitizeData(facture);
-    const safeCompany = this.sanitizeData({
+  private async getCompanyInfo(societeId: string | null): Promise<Record<string, unknown>> {
+    if (societeId) {
+      const societe = await this.prisma.societe.findUnique({
+        where: { id: societeId },
+        select: { nom: true, adresse: true, telephone: true, email: true, ninea: true, rc: true, banque: true, logoUrl: true },
+      });
+      if (societe) return societe;
+    }
+    return {
       nom: this.configService.get('COMPANY_NAME', 'Ma Société'),
       adresse: this.configService.get('COMPANY_ADDRESS', 'Dakar, Sénégal'),
       telephone: this.configService.get('COMPANY_PHONE', ''),
@@ -27,7 +33,16 @@ export class PdfService {
       ninea: this.configService.get('COMPANY_NINEA', ''),
       rc: this.configService.get('COMPANY_RC', ''),
       banque: this.configService.get('COMPANY_BANK', ''),
-    });
+    };
+  }
+
+  async generateFacturePdf(facture: Record<string, unknown>, societeId: string | null = null): Promise<Buffer> {
+    const templatePath = path.join(__dirname, 'templates', 'facture.template.hbs');
+    const template = fs.readFileSync(templatePath, 'utf-8');
+    const compiled = Handlebars.compile(template);
+
+    const safeFacture = this.sanitizeData(facture);
+    const safeCompany = this.sanitizeData(await this.getCompanyInfo(societeId));
 
     const html = compiled({
       facture: safeFacture,
@@ -38,17 +53,13 @@ export class PdfService {
     return this.renderToPdf(html);
   }
 
-  async generateRecuPdf(paiement: Record<string, unknown>): Promise<Buffer> {
+  async generateRecuPdf(paiement: Record<string, unknown>, societeId: string | null = null): Promise<Buffer> {
     const templatePath = path.join(__dirname, 'templates', 'recu.template.hbs');
     const template = fs.readFileSync(templatePath, 'utf-8');
     const compiled = Handlebars.compile(template);
 
     const safePaiement = this.sanitizeData(paiement);
-    const safeCompany = this.sanitizeData({
-      nom: this.configService.get('COMPANY_NAME', 'Ma Société'),
-      adresse: this.configService.get('COMPANY_ADDRESS', 'Dakar, Sénégal'),
-      telephone: this.configService.get('COMPANY_PHONE', ''),
-    });
+    const safeCompany = this.sanitizeData(await this.getCompanyInfo(societeId));
 
     const html = compiled({
       paiement: safePaiement,

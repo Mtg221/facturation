@@ -12,4 +12,10 @@ export const ROUTES = {
   USERS: '/utilisateurs',
   REPORTS: '/rapports',
   SECTEURS: '/secteurs',
+  COMPANY_SETTINGS: '/parametres/societe',
+  // SuperAdmin
+  SUPERADMIN: '/superadmin',
+  SUPERADMIN_SOCIETES: '/superadmin/societes',
+  SUPERADMIN_SOCIETE_CREATE: '/superadmin/societes/nouvelle',
+  SUPERADMIN_SOCIETE_DETAIL: '/superadmin/societes/:id',
 } as const;

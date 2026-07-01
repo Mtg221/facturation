@@ -22,6 +22,11 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/login" replace />;
   }
 
+  // Rediriger le SUPERADMIN vers son espace s'il tente d'accéder aux routes company
+  if (user?.role === 'SUPERADMIN' && allowedRoles && !allowedRoles.includes('SUPERADMIN')) {
+    return <Navigate to="/superadmin" replace />;
+  }
+
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     return (
       <div className="min-h-screen flex items-center justify-center">

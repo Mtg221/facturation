@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'MANAGER' | 'COMPTABLE' | 'CAISSIER' | 'LECTURE';
+export type Role = 'SUPERADMIN' | 'ADMIN' | 'MANAGER' | 'COMPTABLE' | 'CAISSIER' | 'LECTURE';
 
 export interface User {
   id: string;
@@ -11,6 +11,12 @@ export interface User {
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
+  societeId: string | null;
+  societe?: {
+    id: string;
+    nom: string;
+    logoUrl?: string;
+  };
 }
 
 export interface AuthTokens {
