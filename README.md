@@ -82,15 +82,6 @@ CLOUDINARY_API_SECRET=...
 
 ---
 
-## Comptes par défaut (après seed)
-
-| Rôle | Email | Mot de passe |
-|------|-------|--------------|
-| SUPERADMIN | superadmin@plateforme.sn | SuperREDACTED |
-| ADMIN 2M | admin@2mlogistique.sn | REDACTED |
-
----
-
 ## Déploiement (Render + Vercel)
 
 ### Backend (Render)
