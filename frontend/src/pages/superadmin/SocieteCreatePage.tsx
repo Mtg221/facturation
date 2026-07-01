@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
-import societesService, { CreateSocietePayload } from '../../services/societes.service';
+import societesService from '../../services/societes.service';
+import type { CreateSocietePayload } from '../../services/societes.service';
 import { ROUTES } from '../../constants/routes';
 
 export default function SocieteCreatePage() {
