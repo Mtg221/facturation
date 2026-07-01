@@ -20,11 +20,9 @@ export class FilesService {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: 'facturation/logos',
           public_id: `societe_${societeId}`,
           overwrite: true,
           resource_type: 'image',
-          transformation: [{ width: 400, height: 200, crop: 'limit' }],
         },
         (error, result) => {
           if (error || !result) return reject(new BadRequestException(`Erreur Cloudinary: ${error?.message ?? 'unknown'}`));
