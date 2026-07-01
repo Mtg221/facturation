@@ -9,18 +9,20 @@ export class FacturesNumberService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async generateNextNumber(): Promise<string> {
+  async generateNextNumber(societeId?: string | null): Promise<string> {
     const year = new Date().getFullYear();
-    const key = `facture_counter:${year}`;
+    const scope = societeId ?? 'global';
+    const key = `facture_counter:${scope}:${year}`;
 
     const exists = await this.redis.exists(key);
 
     if (!exists) {
-      // Seed from DB max for this year
       const lastFacture = await this.prisma.facture.findFirst({
-        where: { numero: { startsWith: `FACT-${year}-` } },
+        where: {
+          numero: { startsWith: `FACT-${year}-` },
+          ...(societeId ? { societeId } : {}),
+        },
         orderBy: { numero: 'desc' },
-        // bypass soft-delete middleware since this is an internal query
       });
 
       let startValue = 0;
@@ -30,7 +32,7 @@ export class FacturesNumberService {
       }
 
       await this.redis.set(key, String(startValue));
-      await this.redis.expire(key, 366 * 24 * 3600); // 1 year TTL
+      await this.redis.expire(key, 366 * 24 * 3600);
     }
 
     const next = await this.redis.incr(key);

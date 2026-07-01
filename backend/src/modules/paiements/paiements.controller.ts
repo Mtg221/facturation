@@ -21,8 +21,9 @@ export class PaiementsController {
   findAll(
     @Query('factureId') factureId: string | undefined,
     @Query() pagination: PaginationDto,
+    @CurrentUser() user: { societeId?: string | null },
   ) {
-    return this.paiementsService.findAll(factureId, pagination);
+    return this.paiementsService.findAll(factureId, pagination, user?.societeId);
   }
 
   @Get(':id')

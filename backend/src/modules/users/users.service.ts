@@ -18,19 +18,23 @@ export class UsersService {
     private readonly auditService: AuditService,
   ) {}
 
-  async findAll(pagination: PaginationDto) {
+  async findAll(pagination: PaginationDto, societeId?: string | null) {
     const { page = 1, limit = 20, search } = pagination;
     const skip = (page - 1) * limit;
 
+    const base: Record<string, unknown> = {};
+    if (societeId) base.societeId = societeId;
+
     const where = search
       ? {
+          ...base,
           OR: [
             { nom: { contains: search, mode: 'insensitive' as const } },
             { prenom: { contains: search, mode: 'insensitive' as const } },
             { email: { contains: search, mode: 'insensitive' as const } },
           ],
         }
-      : {};
+      : base;
 
     const [data, total] = await Promise.all([
       this.prisma.user.findMany({
@@ -80,7 +84,7 @@ export class UsersService {
     return user;
   }
 
-  async create(dto: CreateUserDto, actorId: string) {
+  async create(dto: CreateUserDto, actorId: string, societeId?: string | null) {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email.toLowerCase() },
     });
@@ -94,6 +98,7 @@ export class UsersService {
         ...dto,
         email: dto.email.toLowerCase(),
         motDePasse: hashedPassword,
+        ...(societeId ? { societeId } : {}),
       },
       select: {
         id: true,

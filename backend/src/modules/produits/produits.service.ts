@@ -11,18 +11,22 @@ export class ProduitsService {
     private readonly auditService: AuditService,
   ) {}
 
-  async findAll(pagination: PaginationDto) {
+  async findAll(pagination: PaginationDto, societeId?: string | null) {
     const { page = 1, limit = 20, search } = pagination;
     const skip = (page - 1) * limit;
 
+    const base: Record<string, unknown> = {};
+    if (societeId) base.societeId = societeId;
+
     const where = search
       ? {
+          ...base,
           OR: [
             { designation: { contains: search, mode: 'insensitive' as const } },
             { reference: { contains: search, mode: 'insensitive' as const } },
           ],
         }
-      : {};
+      : base;
 
     const [data, total] = await Promise.all([
       this.prisma.produit.findMany({
@@ -43,8 +47,8 @@ export class ProduitsService {
     return produit;
   }
 
-  async create(dto: CreateProduitDto, actorId: string) {
-    const produit = await this.prisma.produit.create({ data: dto });
+  async create(dto: CreateProduitDto, actorId: string, societeId?: string | null) {
+    const produit = await this.prisma.produit.create({ data: { ...dto, ...(societeId ? { societeId } : {}) } });
 
     await this.auditService.log({
       userId: actorId,

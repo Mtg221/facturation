@@ -7,13 +7,16 @@ import { PaginationDto, paginate } from '../../common/dto/pagination.dto';
 export class SecteursService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(pagination: PaginationDto) {
+  async findAll(pagination: PaginationDto, societeId?: string | null) {
     const { page = 1, limit = 50, search } = pagination;
     const skip = (page - 1) * limit;
 
+    const base: Record<string, unknown> = {};
+    if (societeId) base.societeId = societeId;
+
     const where = search
-      ? { nom: { contains: search, mode: 'insensitive' as const } }
-      : {};
+      ? { ...base, nom: { contains: search, mode: 'insensitive' as const } }
+      : base;
 
     const [data, total] = await Promise.all([
       this.prisma.secteursActivite.findMany({
@@ -40,8 +43,8 @@ export class SecteursService {
     return secteur;
   }
 
-  async create(dto: CreateSecteurDto) {
-    return this.prisma.secteursActivite.create({ data: dto });
+  async create(dto: CreateSecteurDto, societeId?: string | null) {
+    return this.prisma.secteursActivite.create({ data: { ...dto, ...(societeId ? { societeId } : {}) } });
   }
 
   async update(id: string, dto: Partial<CreateSecteurDto>) {

@@ -19,11 +19,12 @@ export class ClientsService {
     private readonly auditService: AuditService,
   ) {}
 
-  async findAll(filter: ClientFilterDto) {
+  async findAll(filter: ClientFilterDto, societeId?: string | null) {
     const { page = 1, limit = 20, search, secteurId, isActive, ville } = filter;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
+    if (societeId) where.societeId = societeId;
 
     if (search) {
       where.OR = [
@@ -71,15 +72,16 @@ export class ClientsService {
     return client;
   }
 
-  async create(dto: CreateClientDto, actorId: string) {
+  async create(dto: CreateClientDto, actorId: string, societeId?: string | null) {
     const { secteurIds, ...clientData } = dto;
 
-    const code = await this.generateClientCode();
+    const code = await this.generateClientCode(societeId);
 
     const client = await this.prisma.client.create({
       data: {
         ...clientData,
         code,
+        ...(societeId ? { societeId } : {}),
         secteurs: secteurIds?.length
           ? { create: secteurIds.map((secteurId) => ({ secteurId })) }
           : undefined,
@@ -164,8 +166,9 @@ export class ClientsService {
     return { message: 'Client supprimé' };
   }
 
-  async exportCsv(): Promise<Buffer> {
+  async exportCsv(societeId?: string | null): Promise<Buffer> {
     const clients = await this.prisma.client.findMany({
+      where: societeId ? { societeId } : undefined,
       include: { secteurs: { include: { secteur: true } } },
       orderBy: { nom: 'asc' },
     });
@@ -197,13 +200,12 @@ export class ClientsService {
     });
   }
 
-  private async generateClientCode(): Promise<string> {
+  private async generateClientCode(societeId?: string | null): Promise<string> {
     const year = new Date().getFullYear();
     const prefix = `CLI-${year}-`;
 
-    // Use transaction with lock or find the max existing code
     const lastClient = await this.prisma.client.findFirst({
-      where: { code: { startsWith: prefix } },
+      where: { code: { startsWith: prefix }, ...(societeId ? { societeId } : {}) },
       orderBy: { code: 'desc' },
       select: { code: true },
     });

@@ -10,6 +10,7 @@ import { FactureFilterDto } from './dto/facture-filter.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { PdfService } from '../pdf/pdf.service';
+import { RequestUser } from '../../common/types/request-user.type';
 
 @ApiTags('factures')
 @ApiBearerAuth()
@@ -22,8 +23,8 @@ export class FacturesController {
 
   @Get()
   @ApiOperation({ summary: 'Liste des factures' })
-  findAll(@Query() filter: FactureFilterDto) {
-    return this.facturesService.findAll(filter);
+  findAll(@Query() filter: FactureFilterDto, @CurrentUser() user: RequestUser) {
+    return this.facturesService.findAll(filter, user.societeId);
   }
 
   @Get(':id')
@@ -34,30 +35,27 @@ export class FacturesController {
 
   @Get(':id/pdf')
   @ApiOperation({ summary: 'Télécharger la facture en PDF' })
-  async getPdf(@Param('id') id: string, @Res() res: Response, @CurrentUser() user: { societeId?: string }) {
+  async getPdf(@Param('id') id: string, @Res() res: Response, @CurrentUser() user: RequestUser) {
     const facture = await this.facturesService.findOne(id);
-    const buffer = await this.pdfService.generateFacturePdf(facture, user?.societeId ?? null);
+    const buffer = await this.pdfService.generateFacturePdf(facture, user.societeId);
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="facture-${facture.numero}.pdf"`,
-    );
+    res.setHeader('Content-Disposition', `attachment; filename="facture-${facture.numero}.pdf"`);
     res.send(buffer);
   }
 
   @Post()
   @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE)
   @ApiOperation({ summary: 'Créer une facture' })
-  create(@Body() dto: CreateFactureDto, @CurrentUser() user: { id: string }) {
-    return this.facturesService.create(dto, user.id);
+  create(@Body() dto: CreateFactureDto, @CurrentUser() user: RequestUser) {
+    return this.facturesService.create(dto, user.id, user.societeId);
   }
 
   @Post(':id/duplicate')
   @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE)
   @ApiOperation({ summary: 'Dupliquer une facture' })
-  duplicate(@Param('id') id: string, @CurrentUser() user: { id: string }) {
-    return this.facturesService.duplicate(id, user.id);
+  duplicate(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.facturesService.duplicate(id, user.id, user.societeId);
   }
 
   @Patch(':id')
@@ -66,7 +64,7 @@ export class FacturesController {
   update(
     @Param('id') id: string,
     @Body() dto: Partial<CreateFactureDto>,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: RequestUser,
   ) {
     return this.facturesService.update(id, dto, user.id);
   }
@@ -74,7 +72,7 @@ export class FacturesController {
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Supprimer une facture (brouillon uniquement)' })
-  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+  remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
     return this.facturesService.remove(id, user.id);
   }
 }

@@ -11,8 +11,9 @@ export class DashboardService {
     private readonly redis: RedisService,
   ) {}
 
-  async getKpis() {
-    const cacheKey = 'dashboard:kpis';
+  async getKpis(societeId?: string | null) {
+    const scope = societeId ?? 'global';
+    const cacheKey = `dashboard:kpis:${scope}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
 
@@ -21,6 +22,8 @@ export class DashboardService {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
+    const scopeWhere = societeId ? { societeId } : {};
+
     const [
       totalClients,
       newClientsThisMonth,
@@ -28,21 +31,22 @@ export class DashboardService {
       revenueThisMonth,
       revenueLastMonth,
     ] = await Promise.all([
-      this.prisma.client.count({ where: { isActive: true } }),
+      this.prisma.client.count({ where: { isActive: true, ...scopeWhere } }),
       this.prisma.client.count({
-        where: { createdAt: { gte: startOfMonth }, isActive: true },
+        where: { createdAt: { gte: startOfMonth }, isActive: true, ...scopeWhere },
       }),
       this.prisma.facture.groupBy({
         by: ['statut'],
+        where: scopeWhere,
         _count: true,
         _sum: { montantTTC: true, resteAPayer: true, montantPaye: true },
       }),
       this.prisma.paiement.aggregate({
-        where: { datePaiement: { gte: startOfMonth } },
+        where: { datePaiement: { gte: startOfMonth }, ...scopeWhere },
         _sum: { montant: true },
       }),
       this.prisma.paiement.aggregate({
-        where: { datePaiement: { gte: startOfLastMonth, lte: endOfLastMonth } },
+        where: { datePaiement: { gte: startOfLastMonth, lte: endOfLastMonth }, ...scopeWhere },
         _sum: { montant: true },
       }),
     ]);
@@ -78,9 +82,10 @@ export class DashboardService {
     return result;
   }
 
-  async getRevenueChart(year?: number) {
+  async getRevenueChart(year?: number, societeId?: string | null) {
     const targetYear = year ?? new Date().getFullYear();
-    const cacheKey = `dashboard:revenue:${targetYear}`;
+    const scope = societeId ?? 'global';
+    const cacheKey = `dashboard:revenue:${scope}:${targetYear}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
 
@@ -88,7 +93,10 @@ export class DashboardService {
     const endDate = new Date(targetYear, 11, 31, 23, 59, 59);
 
     const paiements = await this.prisma.paiement.findMany({
-      where: { datePaiement: { gte: startDate, lte: endDate } },
+      where: {
+        datePaiement: { gte: startDate, lte: endDate },
+        ...(societeId ? { societeId } : {}),
+      },
       select: { montant: true, datePaiement: true },
     });
 
@@ -107,13 +115,15 @@ export class DashboardService {
     return monthlyData;
   }
 
-  async getPaymentStatusChart() {
-    const cacheKey = 'dashboard:payment-status';
+  async getPaymentStatusChart(societeId?: string | null) {
+    const scope = societeId ?? 'global';
+    const cacheKey = `dashboard:payment-status:${scope}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
 
     const stats = await this.prisma.facture.groupBy({
       by: ['statut'],
+      where: societeId ? { societeId } : undefined,
       _count: true,
     });
 
@@ -124,13 +134,14 @@ export class DashboardService {
     return result;
   }
 
-  async getTopClients(limit = 10) {
-    const cacheKey = `dashboard:top-clients:${limit}`;
+  async getTopClients(limit = 10, societeId?: string | null) {
+    const scope = societeId ?? 'global';
+    const cacheKey = `dashboard:top-clients:${scope}:${limit}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
 
     const clients = await this.prisma.client.findMany({
-      where: { isActive: true },
+      where: { isActive: true, ...(societeId ? { societeId } : {}) },
       include: {
         factures: {
           where: { statut: { in: ['PAYEE', 'PARTIELLEMENT_PAYEE'] } },

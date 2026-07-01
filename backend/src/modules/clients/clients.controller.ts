@@ -10,6 +10,7 @@ import { UpdateClientDto } from './dto/update-client.dto';
 import { ClientFilterDto } from './dto/client-filter.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { RequestUser } from '../../common/types/request-user.type';
 
 @ApiTags('clients')
 @ApiBearerAuth()
@@ -19,14 +20,14 @@ export class ClientsController {
 
   @Get()
   @ApiOperation({ summary: 'Liste des clients' })
-  findAll(@Query() filter: ClientFilterDto) {
-    return this.clientsService.findAll(filter);
+  findAll(@Query() filter: ClientFilterDto, @CurrentUser() user: RequestUser) {
+    return this.clientsService.findAll(filter, user.societeId);
   }
 
   @Get('export/csv')
   @ApiOperation({ summary: 'Exporter les clients en CSV' })
-  async exportCsv(@Res() res: Response) {
-    const buffer = await this.clientsService.exportCsv();
+  async exportCsv(@Res() res: Response, @CurrentUser() user: RequestUser) {
+    const buffer = await this.clientsService.exportCsv(user.societeId);
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="clients.csv"');
     res.send('﻿' + buffer.toString('utf-8'));
@@ -41,8 +42,8 @@ export class ClientsController {
   @Post()
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Créer un client' })
-  create(@Body() dto: CreateClientDto, @CurrentUser() user: { id: string }) {
-    return this.clientsService.create(dto, user.id);
+  create(@Body() dto: CreateClientDto, @CurrentUser() user: RequestUser) {
+    return this.clientsService.create(dto, user.id, user.societeId);
   }
 
   @Patch(':id')
@@ -51,7 +52,7 @@ export class ClientsController {
   update(
     @Param('id') id: string,
     @Body() dto: UpdateClientDto,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: RequestUser,
   ) {
     return this.clientsService.update(id, dto, user.id);
   }
@@ -59,7 +60,7 @@ export class ClientsController {
   @Delete(':id')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Supprimer un client' })
-  remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+  remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
     return this.clientsService.remove(id, user.id);
   }
 }

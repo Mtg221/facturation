@@ -22,11 +22,12 @@ export class FacturesService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  async findAll(filter: FactureFilterDto) {
+  async findAll(filter: FactureFilterDto, societeId?: string | null) {
     const { page = 1, limit = 20, search, clientId, statut, dateDebut, dateFin } = filter;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
+    if (societeId) where.societeId = societeId;
 
     if (search) {
       where.OR = [
@@ -78,7 +79,7 @@ export class FacturesService {
     return facture;
   }
 
-  async create(dto: CreateFactureDto, userId: string) {
+  async create(dto: CreateFactureDto, userId: string, societeId?: string | null) {
     const { details, ...factureData } = dto;
 
     if (!details || details.length === 0) {
@@ -88,7 +89,7 @@ export class FacturesService {
     const client = await this.prisma.client.findUnique({ where: { id: dto.clientId } });
     if (!client) throw new NotFoundException('Client introuvable');
 
-    const numero = await this.numberService.generateNextNumber();
+    const numero = await this.numberService.generateNextNumber(societeId);
     const calculatedDetails = this.calculateDetails(details);
     const totals = this.calculateTotals(calculatedDetails, dto.remiseGlobale ?? 0);
     const montantEnLettres = numberToWords(Number(totals.montantTTC));
@@ -100,6 +101,7 @@ export class FacturesService {
         dateEcheance: new Date(dto.dateEcheance),
         numero,
         userId,
+        ...(societeId ? { societeId } : {}),
         ...totals,
         resteAPayer: totals.montantTTC,
         montantEnLettres,
@@ -210,15 +212,16 @@ export class FacturesService {
     return { message: 'Facture supprimée' };
   }
 
-  async duplicate(id: string, userId: string) {
+  async duplicate(id: string, userId: string, societeId?: string | null) {
     const original = await this.findOne(id);
-    const numero = await this.numberService.generateNextNumber();
+    const numero = await this.numberService.generateNextNumber(societeId);
 
     const facture = await this.prisma.facture.create({
       data: {
         clientId: original.clientId,
         userId,
         numero,
+        ...(societeId ? { societeId } : {}),
         statut: 'BROUILLON',
         dateEmission: new Date(),
         dateEcheance: new Date(Date.now() + 30 * 24 * 3600 * 1000),

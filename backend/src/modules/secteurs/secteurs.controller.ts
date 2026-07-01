@@ -5,6 +5,7 @@ import { SecteursService } from './secteurs.service';
 import { CreateSecteurDto } from './dto/create-secteur.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @ApiTags('secteurs')
 @ApiBearerAuth()
@@ -14,8 +15,8 @@ export class SecteursController {
 
   @Get()
   @ApiOperation({ summary: 'Liste des secteurs d\'activité' })
-  findAll(@Query() pagination: PaginationDto) {
-    return this.secteursService.findAll(pagination);
+  findAll(@Query() pagination: PaginationDto, @CurrentUser() user: { societeId?: string | null }) {
+    return this.secteursService.findAll(pagination, user?.societeId);
   }
 
   @Get(':id')
@@ -27,8 +28,8 @@ export class SecteursController {
   @Post()
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Créer un secteur' })
-  create(@Body() dto: CreateSecteurDto) {
-    return this.secteursService.create(dto);
+  create(@Body() dto: CreateSecteurDto, @CurrentUser() user: { societeId?: string | null }) {
+    return this.secteursService.create(dto, user?.societeId);
   }
 
   @Patch(':id')

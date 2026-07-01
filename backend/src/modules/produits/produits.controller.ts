@@ -15,8 +15,8 @@ export class ProduitsController {
 
   @Get()
   @ApiOperation({ summary: 'Catalogue des produits/services' })
-  findAll(@Query() pagination: PaginationDto) {
-    return this.produitsService.findAll(pagination);
+  findAll(@Query() pagination: PaginationDto, @CurrentUser() user: { societeId?: string | null }) {
+    return this.produitsService.findAll(pagination, user.societeId);
   }
 
   @Get(':id')
@@ -28,8 +28,8 @@ export class ProduitsController {
   @Post()
   @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE)
   @ApiOperation({ summary: 'Créer un produit/service' })
-  create(@Body() dto: CreateProduitDto, @CurrentUser() user: { id: string }) {
-    return this.produitsService.create(dto, user.id);
+  create(@Body() dto: CreateProduitDto, @CurrentUser() user: { id: string; societeId?: string | null }) {
+    return this.produitsService.create(dto, user.id, user.societeId);
   }
 
   @Patch(':id')

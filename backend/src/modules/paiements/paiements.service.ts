@@ -20,11 +20,13 @@ export class PaiementsService {
     private readonly pdfService: PdfService,
   ) {}
 
-  async findAll(factureId?: string, pagination?: PaginationDto) {
+  async findAll(factureId?: string, pagination?: PaginationDto, societeId?: string | null) {
     const { page = 1, limit = 20 } = pagination ?? {};
     const skip = (page - 1) * limit;
 
-    const where = factureId ? { factureId } : {};
+    const where: Record<string, unknown> = {};
+    if (factureId) where.factureId = factureId;
+    if (societeId) where.societeId = societeId;
 
     const [data, total] = await Promise.all([
       this.prisma.paiement.findMany({
@@ -86,6 +88,7 @@ export class PaiementsService {
       data: {
         factureId: dto.factureId,
         userId,
+        ...(facture.societeId ? { societeId: facture.societeId } : {}),
         montant: dto.montant,
         mode: dto.mode,
         datePaiement: dto.datePaiement ? new Date(dto.datePaiement) : new Date(),

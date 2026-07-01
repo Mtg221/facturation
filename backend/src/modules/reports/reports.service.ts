@@ -5,11 +5,12 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class ReportsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRevenueReport(dateDebut: Date, dateFin: Date) {
+  async getRevenueReport(dateDebut: Date, dateFin: Date, societeId?: string | null) {
     const factures = await this.prisma.facture.findMany({
       where: {
         dateEmission: { gte: dateDebut, lte: dateFin },
         statut: { in: ['PAYEE', 'PARTIELLEMENT_PAYEE'] },
+        ...(societeId ? { societeId } : {}),
       },
       include: {
         client: { select: { nom: true, code: true } },
@@ -33,10 +34,11 @@ export class ReportsService {
     };
   }
 
-  async getImpayesReport() {
+  async getImpayesReport(societeId?: string | null) {
     return this.prisma.facture.findMany({
       where: {
         statut: { in: ['ENVOYEE', 'PARTIELLEMENT_PAYEE', 'EN_RETARD'] },
+        ...(societeId ? { societeId } : {}),
       },
       include: {
         client: { select: { nom: true, code: true, telephone1: true, email: true } },
