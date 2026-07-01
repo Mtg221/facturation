@@ -114,11 +114,6 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-400 text-center">
-              Compte démo : admin@facturation.com / Admin@12345
-            </p>
-          </div>
         </div>
       </div>
     </div>
