@@ -19,13 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      setIsLoading(false);
-      return;
-    }
-
-    // Try to get current user
+    // Try to restore session via cookie (refreshToken est httpOnly, pas en localStorage)
     authService
       .getMe()
       .then((userData) => setUser(userData))
@@ -38,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, motDePasse: string) => {
     const response = await authService.login({ email, motDePasse });
     setAccessToken(response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
+    if (response.refreshToken) localStorage.setItem('refreshToken', response.refreshToken);
     setUser(response.user);
   };
 
