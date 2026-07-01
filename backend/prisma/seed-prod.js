@@ -13,6 +13,7 @@ async function main() {
     'manager@facturation.com',
     'caissier@facturation.com',
     'superadmin@plateforme.sn',
+    'admin@2mlogistique.sn',
   ];
   const disabled = await prisma.user.updateMany({
     where: { email: { in: demoEmails } },
@@ -55,24 +56,6 @@ async function main() {
   });
   console.log('✅ SUPERADMIN:', superAdmin.email);
 
-  const adminRawPassword = process.env.SEED_ADMIN_PASSWORD;
-  if (!adminRawPassword) throw new Error('SEED_ADMIN_PASSWORD env var is required');
-  const adminPassword = await bcrypt.hash(adminRawPassword, 12);
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@2mlogistique.sn' },
-    update: { emailVerified: true },
-    create: {
-      email: 'admin@2mlogistique.sn',
-      nom: 'Admin',
-      prenom: '2M',
-      motDePasse: adminPassword,
-      role: 'ADMIN',
-      isActive: true,
-      emailVerified: true,
-      societeId: societe.id,
-    },
-  });
-  console.log('✅ ADMIN:', admin.email);
 }
 
 main()
