@@ -9,6 +9,8 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "migrate:deploy": "prisma migrate deploy",
+    "seed:prod": "ts-node --transpile-only prisma/seed-prod.ts",
+    "start:render": "prisma migrate deploy && ts-node --transpile-only prisma/seed-prod.ts && node dist/main",
     "prisma:generate": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
