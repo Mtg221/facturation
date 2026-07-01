@@ -77,6 +77,24 @@ const societesService = {
     await api.delete(`/societes/${id}`);
   },
 
+  uploadLogo: async (societeId: string, file: File): Promise<Societe> => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    const res = await api.post(`/societes/${societeId}/logo`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data;
+  },
+
+  uploadMyLogo: async (file: File): Promise<Societe> => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    const res = await api.post('/societes/me/logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data;
+  },
+
   createAdmin: async (societeId: string, payload: CreateAdminPayload) => {
     const res = await api.post(`/societes/${societeId}/admin`, payload);
     return res.data.data;

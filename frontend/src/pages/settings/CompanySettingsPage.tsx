@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { Save, Building2 } from 'lucide-react';
+import { Save, Building2, Upload, ImageIcon } from 'lucide-react';
 import { useAuth } from '../../contexts/auth.context';
 import societesService from '../../services/societes.service';
 
@@ -20,11 +20,21 @@ export default function CompanySettingsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Record<string, string>>({});
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: societe, isLoading } = useQuery({
     queryKey: ['my-societe'],
     queryFn: () => societesService.findOne(user!.societeId!),
     enabled: !!user?.societeId,
+  });
+
+  const uploadLogoMutation = useMutation({
+    mutationFn: (file: File) => societesService.uploadMyLogo(file),
+    onSuccess: () => {
+      toast.success('Logo mis à jour');
+      queryClient.invalidateQueries({ queryKey: ['my-societe'] });
+    },
+    onError: () => toast.error("Erreur lors de l'upload"),
   });
 
   const mutation = useMutation({
@@ -63,6 +73,38 @@ export default function CompanySettingsPage() {
         onSubmit={(e) => { e.preventDefault(); mutation.mutate(form); }}
         className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5"
       >
+        {/* Logo */}
+        <div className="pb-5 border-b border-gray-100">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-16 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
+              {societe?.logoUrl
+                ? <img src={societe.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                : <ImageIcon size={24} className="text-gray-300" />
+              }
+            </div>
+            <div>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogoMutation.mutate(f); }}
+              />
+              <button
+                type="button"
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploadLogoMutation.isPending}
+                className="flex items-center gap-2 border border-gray-300 hover:bg-gray-50 disabled:opacity-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                <Upload size={14} />
+                {uploadLogoMutation.isPending ? 'Upload...' : 'Choisir un logo'}
+              </button>
+              <p className="text-xs text-gray-400 mt-1">JPG, PNG, SVG — max 2 Mo</p>
+            </div>
+          </div>
+        </div>
+
         {fields.map((f) => (
           <div key={f.key}>
             <label htmlFor={f.key} className={labelCls}>{f.label}{f.required ? ' *' : ''}</label>

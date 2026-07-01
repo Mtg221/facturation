@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Save, UserPlus } from 'lucide-react';
+import { ArrowLeft, Save, UserPlus, Upload, ImageIcon } from 'lucide-react';
 import societesService from '../../services/societes.service';
 
 type Tab = 'infos' | 'users' | 'stats';
@@ -15,6 +15,7 @@ export default function SocieteDetailPage() {
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [adminForm, setAdminForm] = useState({ email: '', nom: '', prenom: '', motDePasse: '' });
   const [form, setForm] = useState<Record<string, string>>({});
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: societe, isLoading } = useQuery({
     queryKey: ['societe', id],
@@ -32,6 +33,15 @@ export default function SocieteDetailPage() {
     queryKey: ['societe-stats', id],
     queryFn: () => societesService.getSocieteStats(id!),
     enabled: !!id && tab === 'stats',
+  });
+
+  const uploadLogoMutation = useMutation({
+    mutationFn: (file: File) => societesService.uploadLogo(id!, file),
+    onSuccess: () => {
+      toast.success('Logo mis à jour');
+      queryClient.invalidateQueries({ queryKey: ['societe', id] });
+    },
+    onError: () => toast.error("Erreur lors de l'upload"),
   });
 
   const updateMutation = useMutation({
@@ -110,6 +120,37 @@ export default function SocieteDetailPage() {
       {/* Infos tab */}
       {tab === 'infos' && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-2xl">
+          {/* Logo */}
+          <div className="mb-6 pb-6 border-b border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-16 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
+                {societe.logoUrl
+                  ? <img src={societe.logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                  : <ImageIcon size={24} className="text-gray-300" />
+                }
+              </div>
+              <div>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogoMutation.mutate(f); }}
+                />
+                <button
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploadLogoMutation.isPending}
+                  className="flex items-center gap-2 border border-gray-300 hover:bg-gray-50 disabled:opacity-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <Upload size={14} />
+                  {uploadLogoMutation.isPending ? 'Upload...' : 'Choisir un logo'}
+                </button>
+                <p className="text-xs text-gray-400 mt-1">JPG, PNG, SVG — max 2 Mo</p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-4">
             {fields.map((f) => (
               <div key={f.key}>
