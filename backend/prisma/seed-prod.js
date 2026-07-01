@@ -39,7 +39,7 @@ async function main() {
   const superAdminPassword = await bcrypt.hash('SuperREDACTED', 12);
   const superAdmin = await prisma.user.upsert({
     where: { email: 'superadmin@plateforme.sn' },
-    update: {},
+    update: { emailVerified: true },
     create: {
       email: 'superadmin@plateforme.sn',
       nom: 'Super',
@@ -47,6 +47,7 @@ async function main() {
       motDePasse: superAdminPassword,
       role: 'SUPERADMIN',
       isActive: true,
+      emailVerified: true,
     },
   });
   console.log('✅ SUPERADMIN:', superAdmin.email);
@@ -54,7 +55,7 @@ async function main() {
   const adminPassword = await bcrypt.hash('REDACTED', 12);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@2mlogistique.sn' },
-    update: {},
+    update: { emailVerified: true },
     create: {
       email: 'admin@2mlogistique.sn',
       nom: 'Admin',
@@ -62,6 +63,7 @@ async function main() {
       motDePasse: adminPassword,
       role: 'ADMIN',
       isActive: true,
+      emailVerified: true,
       societeId: societe.id,
     },
   });

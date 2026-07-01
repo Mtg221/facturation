@@ -5,14 +5,19 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { CreateSocieteDto } from './dto/create-societe.dto';
 import { UpdateSocieteDto } from './dto/update-societe.dto';
 import { CreateSocieteAdminDto } from './dto/create-societe-admin.dto';
 import { hashPassword } from '../../common/utils/bcrypt.util';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class SocietesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   async findAll() {
     return this.prisma.societe.findMany({
@@ -70,8 +75,9 @@ export class SocietesService {
     if (existing) throw new ConflictException('Un compte avec cet email existe déjà');
 
     const hashedPassword = await hashPassword(dto.motDePasse);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         email: dto.email.toLowerCase(),
         nom: dto.nom,
@@ -80,6 +86,8 @@ export class SocietesService {
         role: 'ADMIN',
         societeId,
         isActive: true,
+        emailVerified: false,
+        emailVerificationToken: verificationToken,
       },
       select: {
         id: true,
@@ -91,6 +99,15 @@ export class SocietesService {
         createdAt: true,
       },
     });
+
+    // Envoi de l'email de vérification (non bloquant)
+    this.mailService.sendVerificationEmail(
+      dto.email.toLowerCase(),
+      dto.prenom,
+      verificationToken,
+    ).catch(() => {});
+
+    return user;
   }
 
   async getSocieteUsers(societeId: string) {

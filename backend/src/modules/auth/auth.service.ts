@@ -52,6 +52,10 @@ export class AuthService {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
+    if (!user.emailVerified && user.role !== 'SUPERADMIN') {
+      throw new ForbiddenException('Veuillez vérifier votre adresse email avant de vous connecter. Consultez votre boîte mail.');
+    }
+
     const tokens = await this.createSession(user.id, res, deviceFingerprint, ip, userAgent);
 
     await this.auditService.log({
@@ -405,5 +409,20 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { emailVerificationToken: token },
+    });
+
+    if (!user) throw new NotFoundException('Lien de vérification invalide ou expiré');
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true, emailVerificationToken: null },
+    });
+
+    return { message: 'Email vérifié avec succès. Vous pouvez maintenant vous connecter.' };
   }
 }

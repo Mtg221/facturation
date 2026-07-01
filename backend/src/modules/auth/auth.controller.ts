@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Delete, Body, UseGuards, HttpCode, HttpStatus, Res, Req, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, UseGuards, HttpCode, HttpStatus, Res, Req, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
@@ -94,5 +94,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Révoquer une session spécifique' })
   revokeSession(@CurrentUser() user: { id: string }, @Param('sessionId') sessionId: string) {
     return this.authService.revokeSession(user.id, sessionId);
+  }
+
+  @Public()
+  @Get('verify-email')
+  @ApiOperation({ summary: 'Vérifier l\'adresse email via token' })
+  verifyEmail(@Query('token') token: string) {
+    return this.authService.verifyEmail(token);
   }
 }
