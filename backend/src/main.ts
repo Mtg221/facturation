@@ -177,6 +177,9 @@ async function bootstrap() {
       '/api/v1/auth/logout',
       '/api/v1/auth/logout-all',
     ];
+    // Exclure les uploads multipart (CSRF incompatible avec form-data)
+    const isMultipart = (req.headers['content-type'] ?? '').includes('multipart/form-data');
+    if (isMultipart) return next();
     const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
     const isPublicAuth = publicAuthPaths.some((p) => req.path.startsWith(p));
     
