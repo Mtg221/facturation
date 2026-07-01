@@ -6,17 +6,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🚀 Production seed...');
 
-  // Supprimer les comptes de démo créés par l'ancien seed
+  // Désactiver les comptes de démo (ne pas supprimer à cause des FK)
   const demoEmails = [
     'admin@facturation.com',
     'comptable@facturation.com',
     'manager@facturation.com',
     'caissier@facturation.com',
   ];
-  const deleted = await prisma.user.deleteMany({
+  const disabled = await prisma.user.updateMany({
     where: { email: { in: demoEmails } },
+    data: { isActive: false },
   });
-  if (deleted.count > 0) console.log(`🗑️  ${deleted.count} compte(s) démo supprimé(s)`);
+  if (disabled.count > 0) console.log(`🔒 ${disabled.count} compte(s) démo désactivé(s)`);
 
   const societe = await prisma.societe.upsert({
     where: { id: 'default-societe-id' },
