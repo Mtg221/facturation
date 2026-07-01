@@ -91,7 +91,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 3000);
-  const corsOrigins = configService.get<string>('CORS_ORIGINS', 'http://localhost:5173');
+  const corsOriginsEnv = configService.get<string>('CORS_ORIGINS', '');
+  const corsOrigins = corsOriginsEnv || 'https://facturation-rust.vercel.app,http://localhost:5173';
   const isProduction = configService.get<string>('NODE_ENV') === 'production';
 
   // Validate critical secrets are not using default/placeholder values
@@ -102,9 +103,9 @@ async function bootstrap() {
   // Helmet with proper CSP
   app.use(
     helmet({
-      crossOriginEmbedderPolicy: true,
-      crossOriginOpenerPolicy: { policy: 'same-origin' },
-      crossOriginResourcePolicy: { policy: 'same-origin' },
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
       contentSecurityPolicy: isProduction
         ? {
             directives: {
@@ -190,7 +191,7 @@ async function bootstrap() {
     origin: validateCorsOrigins(corsOrigins),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
     exposedHeaders: ['Set-Cookie'],
     maxAge: 86400, // 24 hours
   });
