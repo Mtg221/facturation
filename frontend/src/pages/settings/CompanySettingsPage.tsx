@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { Save, Building2 } from 'lucide-react';
 import { useAuth } from '../../contexts/auth.context';
 import societesService from '../../services/societes.service';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
 
 const fields = [
   { key: 'nom', label: 'Nom de la société', required: true },
@@ -37,6 +34,7 @@ export default function CompanySettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['my-societe'] });
       setForm({});
     },
+    onError: () => toast.error('Erreur lors de la mise à jour'),
   });
 
   if (isLoading) return <div className="p-8 text-gray-500">Chargement...</div>;
@@ -45,6 +43,9 @@ export default function CompanySettingsPage() {
     if (key in form) return form[key];
     return ((societe ?? {}) as Record<string, unknown>)[key] as string ?? '';
   };
+
+  const inputCls = 'mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  const labelCls = 'block text-sm font-medium text-gray-700';
 
   return (
     <div className="p-8 max-w-2xl">
@@ -64,21 +65,25 @@ export default function CompanySettingsPage() {
       >
         {fields.map((f) => (
           <div key={f.key}>
-            <Label htmlFor={f.key}>{f.label}{f.required ? ' *' : ''}</Label>
-            <Input
+            <label htmlFor={f.key} className={labelCls}>{f.label}{f.required ? ' *' : ''}</label>
+            <input
               id={f.key}
               value={getValue(f.key)}
               onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
-              className="mt-1"
+              className={inputCls}
             />
           </div>
         ))}
 
         <div className="pt-2">
-          <Button type="submit" disabled={mutation.isPending || Object.keys(form).length === 0}>
-            <Save size={15} className="mr-2" />
+          <button
+            type="submit"
+            disabled={mutation.isPending || Object.keys(form).length === 0}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Save size={15} />
             {mutation.isPending ? 'Sauvegarde...' : 'Sauvegarder'}
-          </Button>
+          </button>
         </div>
       </form>
     </div>

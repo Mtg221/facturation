@@ -1,13 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import societesService, { CreateSocietePayload } from '../../services/societes.service';
 import { ROUTES } from '../../constants/routes';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
 
 export default function SocieteCreatePage() {
   const navigate = useNavigate();
@@ -21,6 +18,7 @@ export default function SocieteCreatePage() {
       queryClient.invalidateQueries({ queryKey: ['societes'] });
       navigate(ROUTES.SUPERADMIN_SOCIETE_DETAIL.replace(':id', societe.id));
     },
+    onError: () => toast.error('Erreur lors de la création'),
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,6 +29,9 @@ export default function SocieteCreatePage() {
     e.preventDefault();
     mutation.mutate(form);
   };
+
+  const inputCls = 'mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  const labelCls = 'block text-sm font-medium text-gray-700';
 
   return (
     <div className="p-8 max-w-2xl">
@@ -43,49 +44,57 @@ export default function SocieteCreatePage() {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
         <div>
-          <Label htmlFor="nom">Nom de la société *</Label>
-          <Input id="nom" name="nom" value={form.nom} onChange={handleChange} required className="mt-1" />
+          <label htmlFor="nom" className={labelCls}>Nom de la société *</label>
+          <input id="nom" name="nom" value={form.nom} onChange={handleChange} required className={inputCls} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="ninea">NINEA</Label>
-            <Input id="ninea" name="ninea" value={form.ninea ?? ''} onChange={handleChange} className="mt-1" />
+            <label htmlFor="ninea" className={labelCls}>NINEA</label>
+            <input id="ninea" name="ninea" value={form.ninea ?? ''} onChange={handleChange} className={inputCls} />
           </div>
           <div>
-            <Label htmlFor="rc">RCCM</Label>
-            <Input id="rc" name="rc" value={form.rc ?? ''} onChange={handleChange} className="mt-1" />
+            <label htmlFor="rc" className={labelCls}>RCCM</label>
+            <input id="rc" name="rc" value={form.rc ?? ''} onChange={handleChange} className={inputCls} />
           </div>
         </div>
 
         <div>
-          <Label htmlFor="adresse">Adresse</Label>
-          <Input id="adresse" name="adresse" value={form.adresse ?? ''} onChange={handleChange} className="mt-1" />
+          <label htmlFor="adresse" className={labelCls}>Adresse</label>
+          <input id="adresse" name="adresse" value={form.adresse ?? ''} onChange={handleChange} className={inputCls} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="telephone">Téléphone</Label>
-            <Input id="telephone" name="telephone" value={form.telephone ?? ''} onChange={handleChange} className="mt-1" />
+            <label htmlFor="telephone" className={labelCls}>Téléphone</label>
+            <input id="telephone" name="telephone" value={form.telephone ?? ''} onChange={handleChange} className={inputCls} />
           </div>
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" value={form.email ?? ''} onChange={handleChange} className="mt-1" />
+            <label htmlFor="email" className={labelCls}>Email</label>
+            <input id="email" name="email" type="email" value={form.email ?? ''} onChange={handleChange} className={inputCls} />
           </div>
         </div>
 
         <div>
-          <Label htmlFor="banque">Compte bancaire</Label>
-          <Input id="banque" name="banque" value={form.banque ?? ''} onChange={handleChange} className="mt-1" />
+          <label htmlFor="banque" className={labelCls}>Compte bancaire</label>
+          <input id="banque" name="banque" value={form.banque ?? ''} onChange={handleChange} className={inputCls} />
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={mutation.isPending}>
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
             {mutation.isPending ? 'Création...' : 'Créer la société'}
-          </Button>
-          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
             Annuler
-          </Button>
+          </button>
         </div>
       </form>
     </div>

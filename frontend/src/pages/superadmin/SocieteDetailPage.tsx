@@ -1,13 +1,9 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { ArrowLeft, Save, UserPlus } from 'lucide-react';
 import societesService from '../../services/societes.service';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import { Badge } from '../../components/ui/badge';
 
 type Tab = 'infos' | 'users' | 'stats';
 
@@ -18,6 +14,7 @@ export default function SocieteDetailPage() {
   const [tab, setTab] = useState<Tab>('infos');
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [adminForm, setAdminForm] = useState({ email: '', nom: '', prenom: '', motDePasse: '' });
+  const [form, setForm] = useState<Record<string, string>>({});
 
   const { data: societe, isLoading } = useQuery({
     queryKey: ['societe', id],
@@ -37,14 +34,14 @@ export default function SocieteDetailPage() {
     enabled: !!id && tab === 'stats',
   });
 
-  const [form, setForm] = useState<Record<string, string>>({});
-
   const updateMutation = useMutation({
     mutationFn: (data: Record<string, string>) => societesService.update(id!, data),
     onSuccess: () => {
       toast.success('Informations mises à jour');
       queryClient.invalidateQueries({ queryKey: ['societe', id] });
+      setForm({});
     },
+    onError: () => toast.error('Erreur lors de la mise à jour'),
   });
 
   const createAdminMutation = useMutation({
@@ -55,6 +52,7 @@ export default function SocieteDetailPage() {
       setAdminForm({ email: '', nom: '', prenom: '', motDePasse: '' });
       queryClient.invalidateQueries({ queryKey: ['societe-users', id] });
     },
+    onError: () => toast.error('Erreur lors de la création'),
   });
 
   if (isLoading) return <div className="p-8 text-gray-500">Chargement...</div>;
@@ -75,10 +73,8 @@ export default function SocieteDetailPage() {
     return (societe as Record<string, unknown>)[key] as string ?? '';
   };
 
-  const handleSave = () => {
-    if (Object.keys(form).length === 0) return;
-    updateMutation.mutate(form);
-  };
+  const inputCls = 'mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  const labelCls = 'block text-sm font-medium text-gray-700';
 
   return (
     <div className="p-8">
@@ -90,11 +86,9 @@ export default function SocieteDetailPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{societe.nom}</h1>
-          <div className="flex gap-2 mt-1">
-            <Badge variant={societe.isActive ? 'default' : 'secondary'}>
-              {societe.isActive ? 'Active' : 'Inactive'}
-            </Badge>
-          </div>
+          <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${societe.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+            {societe.isActive ? 'Active' : 'Inactive'}
+          </span>
         </div>
       </div>
 
@@ -119,21 +113,25 @@ export default function SocieteDetailPage() {
           <div className="space-y-4">
             {fields.map((f) => (
               <div key={f.key}>
-                <Label htmlFor={f.key}>{f.label}{f.required ? ' *' : ''}</Label>
-                <Input
+                <label htmlFor={f.key} className={labelCls}>{f.label}{f.required ? ' *' : ''}</label>
+                <input
                   id={f.key}
                   value={getValue(f.key)}
                   onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))}
-                  className="mt-1"
+                  className={inputCls}
                 />
               </div>
             ))}
           </div>
-          <div className="mt-6 flex gap-3">
-            <Button onClick={handleSave} disabled={updateMutation.isPending || Object.keys(form).length === 0}>
-              <Save size={15} className="mr-2" />
+          <div className="mt-6">
+            <button
+              onClick={() => { if (Object.keys(form).length > 0) updateMutation.mutate(form); }}
+              disabled={updateMutation.isPending || Object.keys(form).length === 0}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              <Save size={15} />
               {updateMutation.isPending ? 'Sauvegarde...' : 'Sauvegarder'}
-            </Button>
+            </button>
           </div>
         </div>
       )}
@@ -143,26 +141,60 @@ export default function SocieteDetailPage() {
         <div className="max-w-3xl">
           <div className="flex justify-between items-center mb-4">
             <span className="text-sm text-gray-500">{users.length} utilisateur(s)</span>
-            <Button size="sm" onClick={() => setShowAdminForm(!showAdminForm)}>
-              <UserPlus size={15} className="mr-2" />
+            <button
+              onClick={() => setShowAdminForm(!showAdminForm)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              <UserPlus size={15} />
               Ajouter un admin
-            </Button>
+            </button>
           </div>
 
           {showAdminForm && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 space-y-3">
-              <h3 className="font-semibold text-sm text-blue-800">Créer un administrateur</h3>
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+              <h3 className="font-semibold text-sm text-blue-800 mb-3">Créer un administrateur</h3>
               <div className="grid grid-cols-2 gap-3">
-                <Input placeholder="Prénom" value={adminForm.prenom} onChange={(e) => setAdminForm((p) => ({ ...p, prenom: e.target.value }))} />
-                <Input placeholder="Nom" value={adminForm.nom} onChange={(e) => setAdminForm((p) => ({ ...p, nom: e.target.value }))} />
-                <Input placeholder="Email" type="email" value={adminForm.email} onChange={(e) => setAdminForm((p) => ({ ...p, email: e.target.value }))} />
-                <Input placeholder="Mot de passe" type="password" value={adminForm.motDePasse} onChange={(e) => setAdminForm((p) => ({ ...p, motDePasse: e.target.value }))} />
+                <input
+                  placeholder="Prénom"
+                  value={adminForm.prenom}
+                  onChange={(e) => setAdminForm((p) => ({ ...p, prenom: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  placeholder="Nom"
+                  value={adminForm.nom}
+                  onChange={(e) => setAdminForm((p) => ({ ...p, nom: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  placeholder="Email"
+                  type="email"
+                  value={adminForm.email}
+                  onChange={(e) => setAdminForm((p) => ({ ...p, email: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  placeholder="Mot de passe"
+                  type="password"
+                  value={adminForm.motDePasse}
+                  onChange={(e) => setAdminForm((p) => ({ ...p, motDePasse: e.target.value }))}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => createAdminMutation.mutate()} disabled={createAdminMutation.isPending}>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => createAdminMutation.mutate()}
+                  disabled={createAdminMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
                   {createAdminMutation.isPending ? 'Création...' : 'Créer'}
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setShowAdminForm(false)}>Annuler</Button>
+                </button>
+                <button
+                  onClick={() => setShowAdminForm(false)}
+                  className="border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Annuler
+                </button>
               </div>
             </div>
           )}
@@ -175,8 +207,10 @@ export default function SocieteDetailPage() {
                   <div className="text-sm text-gray-500">{u.email}</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Badge variant="outline">{u.role}</Badge>
-                  <Badge variant={u.isActive ? 'default' : 'secondary'}>{u.isActive ? 'Actif' : 'Inactif'}</Badge>
+                  <span className="px-2.5 py-1 border border-gray-200 rounded-full text-xs text-gray-600">{u.role}</span>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${u.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {u.isActive ? 'Actif' : 'Inactif'}
+                  </span>
                 </div>
               </div>
             ))}
@@ -194,7 +228,7 @@ export default function SocieteDetailPage() {
             { label: 'Factures', value: stats.factures },
             { label: 'Clients', value: stats.clients },
             { label: 'Utilisateurs', value: stats.users },
-            { label: "CA encaissé", value: `${Number(stats.chiffreAffaires).toLocaleString('fr-FR')} FCFA` },
+            { label: 'CA encaissé', value: `${Number(stats.chiffreAffaires).toLocaleString('fr-FR')} FCFA` },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 text-center">
               <div className="text-2xl font-bold text-gray-900">{s.value}</div>
