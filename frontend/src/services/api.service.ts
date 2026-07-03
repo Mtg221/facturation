@@ -74,7 +74,21 @@ function processQueue(error: unknown, token: string | null = null) {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _csrfRetry?: boolean };
+
+    // CSRF token expired or invalid — refresh it and retry once
+    if (error.response?.status === 403 && !originalRequest._csrfRetry) {
+      const message = (error.response?.data as { message?: string })?.message ?? '';
+      if (message.toLowerCase().includes('csrf') || message.toLowerCase().includes('invalid csrf token')) {
+        originalRequest._csrfRetry = true;
+        csrfToken = null;
+        await fetchCsrfToken();
+        if (csrfToken) {
+          originalRequest.headers['X-CSRF-Token'] = csrfToken;
+        }
+        return api(originalRequest);
+      }
+    }
 
     const isAuthEndpoint = originalRequest.url?.includes('/auth/');
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
