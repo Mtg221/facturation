@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
           localStorage.removeItem('accessToken');
           setAccessToken(null);
+          queryClient.clear();
         }
       })
       .finally(() => setIsLoading(false));
