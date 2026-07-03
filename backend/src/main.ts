@@ -164,7 +164,8 @@ async function bootstrap() {
     cookie: {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      // Frontend et backend sur des domaines différents : 'strict' bloque le cookie en cross-site
+      sameSite: isProduction ? 'none' : 'strict',
       key: 'csrf-token',
     },
   });

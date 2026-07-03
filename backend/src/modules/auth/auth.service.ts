@@ -374,9 +374,11 @@ export class AuthService {
     const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict' as const,
+      // Frontend (Vercel) et backend (Render) sont sur des domaines différents :
+      // 'strict' bloquerait l'envoi du cookie en cross-site
+      sameSite: (isProduction ? 'none' : 'strict') as 'none' | 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth/refresh',
+      path: '/api/v1/auth',
     };
     res.cookie('refreshToken', token, cookieOptions);
   }
@@ -386,8 +388,8 @@ export class AuthService {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
-      path: '/api/auth/refresh',
+      sameSite: (isProduction ? 'none' : 'strict') as 'none' | 'strict',
+      path: '/api/v1/auth',
     });
   }
 
