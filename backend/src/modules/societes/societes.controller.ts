@@ -53,6 +53,38 @@ export class SocietesController {
     return this.societesService.create(dto);
   }
 
+  // ── ADMIN (company-level) "me" endpoints ─────────────────────────────────
+  // IMPORTANT: déclarées AVANT les routes paramétrées `:id` / `:id/...`,
+  // sinon `me` est capturé comme `:id` et la route SUPERADMIN masque celle-ci.
+
+  @Get('me/infos')
+  @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE, Role.CAISSIER, Role.LECTURE)
+  getMySociete(@Request() req: { user: RequestUser }) {
+    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
+    return this.societesService.findOne(req.user.societeId);
+  }
+
+  @Patch('me/infos')
+  @Roles(Role.ADMIN)
+  updateMySociete(@Request() req: { user: RequestUser }, @Body() dto: UpdateSocieteDto) {
+    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
+    return this.societesService.updateMySociete(req.user.societeId, dto);
+  }
+
+  @Post('me/logo')
+  @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('logo', { storage: memoryStorage() }))
+  async uploadLogoAdmin(
+    @Request() req: { user: RequestUser },
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
+    const logoUrl = await this.filesService.uploadLogo(file, req.user.societeId);
+    return this.societesService.updateMySociete(req.user.societeId, { logoUrl });
+  }
+
+  // ── SUPERADMIN endpoints paramétrés ───────────────────────────────────────
+
   @Get(':id')
   @Roles(Role.SUPERADMIN)
   findOne(@Param('id') id: string) {
@@ -100,31 +132,4 @@ export class SocietesController {
     return this.societesService.update(id, { logoUrl });
   }
 
-  // ── ADMIN (company-level) endpoints ───────────────────────────────────────
-
-  @Get('me/infos')
-  @Roles(Role.ADMIN, Role.MANAGER, Role.COMPTABLE, Role.CAISSIER, Role.LECTURE)
-  getMySociete(@Request() req: { user: RequestUser }) {
-    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
-    return this.societesService.findOne(req.user.societeId);
-  }
-
-  @Patch('me/infos')
-  @Roles(Role.ADMIN)
-  updateMySociete(@Request() req: { user: RequestUser }, @Body() dto: UpdateSocieteDto) {
-    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
-    return this.societesService.updateMySociete(req.user.societeId, dto);
-  }
-
-  @Post('me/logo')
-  @Roles(Role.ADMIN)
-  @UseInterceptors(FileInterceptor('logo', { storage: memoryStorage() }))
-  async uploadLogoAdmin(
-    @Request() req: { user: RequestUser },
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!req.user.societeId) throw new ForbiddenException('Aucune société associée');
-    const logoUrl = await this.filesService.uploadLogo(file, req.user.societeId);
-    return this.societesService.updateMySociete(req.user.societeId, { logoUrl });
-  }
 }
