@@ -55,8 +55,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
       const result = await next(params);
 
-      // Decrypt on any find operation, traversing nested objects/arrays
-      if (typeof params.action === 'string' && params.action.startsWith('find') && result && typeof result === 'object') {
+      // Decrypt returned records, traversing nested objects/arrays. Covers reads
+      // (find*) and writes that return the row (create/update/upsert/delete), so
+      // the response right after creating/editing a client is decrypted too.
+      const decryptActions = ['findUnique', 'findUniqueOrThrow', 'findFirst', 'findFirstOrThrow', 'findMany', 'create', 'update', 'upsert', 'delete'];
+      if (typeof params.action === 'string' && decryptActions.includes(params.action) && result && typeof result === 'object') {
         const seen = new Set<unknown>();
         const decryptObject = (obj: any) => {
           if (!obj || typeof obj !== 'object' || seen.has(obj)) return;
