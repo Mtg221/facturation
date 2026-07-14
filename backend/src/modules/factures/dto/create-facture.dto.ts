@@ -15,6 +15,11 @@ export class DetailFactureDto {
   @IsString()
   designation: string;
 
+  @ApiPropertyOptional({ description: 'Observation libre sur la ligne' })
+  @IsOptional()
+  @IsString()
+  observation?: string;
+
   @ApiProperty()
   @Type(() => Number)
   @IsNumber()

@@ -138,12 +138,13 @@
     <table>
       <thead>
         <tr>
-          <th style="width:40%">Désignation</th>
-          <th style="text-align:center;width:8%">Qté</th>
-          <th style="text-align:right;width:14%">Prix unit. HT</th>
-          <th style="text-align:center;width:8%">TVA%</th>
+          <th style="width:26%">Désignation</th>
+          <th style="width:18%">Observation</th>
+          <th style="text-align:center;width:7%">Qté</th>
+          <th style="text-align:right;width:13%">Prix unit. HT</th>
+          <th style="text-align:center;width:7%">TVA%</th>
           <th style="text-align:center;width:8%">Remise%</th>
-          <th style="text-align:right;width:12%">Montant HT</th>
+          <th style="text-align:right;width:11%">Montant HT</th>
           <th style="text-align:right;width:10%">Total TTC</th>
         </tr>
       </thead>
@@ -151,6 +152,7 @@
         {{#each facture.details}}
         <tr>
           <td>{{this.designation}}</td>
+          <td>{{this.observation}}</td>
           <td style="text-align:center">{{this.quantite}}</td>
           <td style="text-align:right">{{formatMoney this.prixUnitaire}}</td>
           <td style="text-align:center">{{this.tva}}%</td>

@@ -10,6 +10,7 @@ export interface DetailFacture {
   id: string;
   produitId?: string;
   designation: string;
+  observation?: string;
   quantite: number;
   prixUnitaire: number;
   tva: number;
@@ -71,6 +72,7 @@ export interface CreateFacturePayload {
   details: Array<{
     produitId?: string;
     designation: string;
+    observation?: string;
     quantite: number;
     prixUnitaire: number;
     tva?: number;

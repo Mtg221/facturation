@@ -136,6 +136,7 @@ export function FactureDetailPage() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Désignation</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">Observation</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-600">Qté</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-600">Prix HT</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-600">TVA</th>
@@ -146,6 +147,7 @@ export function FactureDetailPage() {
                 {(facture.details ?? []).map((d) => (
                   <tr key={d.id}>
                     <td className="px-4 py-3">{d.designation}</td>
+                    <td className="px-4 py-3 text-gray-600">{d.observation ?? '—'}</td>
                     <td className="px-4 py-3 text-center">{Number(d.quantite)}</td>
                     <td className="px-4 py-3 text-right">{formatCurrency(Number(d.prixUnitaire))}</td>
                     <td className="px-4 py-3 text-center">{Number(d.tva)}%</td>

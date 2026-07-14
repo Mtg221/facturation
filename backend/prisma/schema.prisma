@@ -264,6 +264,7 @@ model DetailFacture {
   factureId    String
   produitId    String?
   designation  String
+  observation  String?
   quantite     Decimal  @db.Decimal(10, 3)
   prixUnitaire Decimal  @db.Decimal(15, 2)
   tva          Decimal  @db.Decimal(5, 2) @default(0)

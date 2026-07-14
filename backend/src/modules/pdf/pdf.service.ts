@@ -95,20 +95,27 @@ export class PdfService {
   private sanitizeData(obj: Record<string, unknown>): Record<string, unknown> {
     const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'string') {
-        sanitized[key] = this.escapeHtml(value);
-      } else if (typeof value === 'object' && value !== null) {
-        sanitized[key] = this.sanitizeData(value as Record<string, unknown>);
-      } else if (Array.isArray(value)) {
-        sanitized[key] = value.map((item) => 
-          typeof item === 'object' ? this.sanitizeData(item as Record<string, unknown>) : 
-          typeof item === 'string' ? this.escapeHtml(item) : item
-        );
-      } else {
-        sanitized[key] = value;
-      }
+      sanitized[key] = this.sanitizeValue(value);
     }
     return sanitized;
+  }
+
+  private sanitizeValue(value: unknown): unknown {
+    if (typeof value === 'string') return this.escapeHtml(value);
+    if (Array.isArray(value)) return value.map((item) => this.sanitizeValue(item));
+    if (value instanceof Date) return value;
+    // Prisma Decimal (or anything number-like): keep as number, don't recurse into it
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      typeof (value as { toNumber?: unknown }).toNumber === 'function'
+    ) {
+      return (value as { toNumber: () => number }).toNumber();
+    }
+    if (typeof value === 'object' && value !== null) {
+      return this.sanitizeData(value as Record<string, unknown>);
+    }
+    return value;
   }
 
   private escapeHtml(text: string): string {
@@ -124,8 +131,10 @@ export class PdfService {
   }
 
   private registerHelpers() {
-    Handlebars.registerHelper('formatMoney', (value: number) => {
-      return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(value);
+    Handlebars.registerHelper('formatMoney', (value: unknown) => {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return '0';
+      return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0 }).format(num);
     });
 
     Handlebars.registerHelper('formatDate', (value: string | Date) => {

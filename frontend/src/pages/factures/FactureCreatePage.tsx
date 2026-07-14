@@ -15,6 +15,7 @@ import api from '../../services/api.service';
 const detailSchema = z.object({
   produitId: z.string().optional(),
   designation: z.string().min(1, 'Requis'),
+  observation: z.string().optional(),
   quantite: z.coerce.number().positive('> 0'),
   prixUnitaire: z.coerce.number().min(0),
   tva: z.coerce.number().min(0).max(100).default(18),
@@ -68,7 +69,7 @@ export function FactureCreatePage() {
   } = useForm<FactureFormData>({
     resolver: zodResolver(factureSchema),
     defaultValues: {
-      details: [{ designation: '', quantite: 1, prixUnitaire: 0, tva: 18, remise: 0 }],
+      details: [{ designation: '', observation: '', quantite: 1, prixUnitaire: 0, tva: 18, remise: 0 }],
       remiseGlobale: 0,
     },
   });
@@ -86,6 +87,7 @@ export function FactureCreatePage() {
       details: (facture.details ?? []).map((d) => ({
         produitId: d.produitId ?? undefined,
         designation: d.designation,
+        observation: d.observation ?? '',
         quantite: Number(d.quantite),
         prixUnitaire: Number(d.prixUnitaire),
         tva: Number(d.tva),
@@ -256,7 +258,7 @@ export function FactureCreatePage() {
             <h2 className="font-semibold text-gray-800">Lignes de facture</h2>
             <button
               type="button"
-              onClick={() => append({ designation: '', quantite: 1, prixUnitaire: 0, tva: 18, remise: 0 })}
+              onClick={() => append({ designation: '', observation: '', quantite: 1, prixUnitaire: 0, tva: 18, remise: 0 })}
               className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium"
             >
               <Plus size={15} />
@@ -266,8 +268,9 @@ export function FactureCreatePage() {
 
           <div className="space-y-3">
             <div className="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 px-1">
-              <div className="col-span-3">Produit</div>
-              <div className="col-span-3">Désignation *</div>
+              <div className="col-span-2">Produit</div>
+              <div className="col-span-2">Désignation *</div>
+              <div className="col-span-2">Observation</div>
               <div className="col-span-1">Qté</div>
               <div className="col-span-2">Prix HT</div>
               <div className="col-span-1">TVA%</div>
@@ -282,7 +285,7 @@ export function FactureCreatePage() {
 
               return (
                 <div key={field.id} className="grid grid-cols-12 gap-2 items-center">
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <select
                       onChange={(e) => handleProduitChange(index, e.target.value)}
                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:border-blue-400 bg-white"
@@ -293,10 +296,17 @@ export function FactureCreatePage() {
                       ))}
                     </select>
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-2">
                     <input
                       {...register(`details.${index}.designation`)}
                       placeholder="Désignation"
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:border-blue-400"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <input
+                      {...register(`details.${index}.observation`)}
+                      placeholder="Observation (libre)"
                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:border-blue-400"
                     />
                   </div>
