@@ -13,17 +13,17 @@ export class CreateClientDto {
 
   @ApiPropertyOptional({ example: '+221 77 123 45 67' })
   @IsOptional()
-  @Matches(/^(\+221|00221)?[789]\d{8}$/, { message: 'Format téléphone Sénégal invalide (+221 7X XXX XX XX)' })
+  @Matches(/^[+\d][\d\s().-]{5,19}$/, { message: 'Format téléphone invalide' })
   telephone1?: string;
 
   @ApiPropertyOptional({ example: '+221 77 123 45 67' })
   @IsOptional()
-  @Matches(/^(\+221|00221)?[789]\d{8}$/, { message: 'Format téléphone Sénégal invalide' })
+  @Matches(/^[+\d][\d\s().-]{5,19}$/, { message: 'Format téléphone invalide' })
   telephone2?: string;
 
   @ApiPropertyOptional({ example: '+221 77 123 45 67' })
   @IsOptional()
-  @Matches(/^(\+221|00221)?[789]\d{8}$/, { message: 'Format téléphone Sénégal invalide' })
+  @Matches(/^[+\d][\d\s().-]{5,19}$/, { message: 'Format téléphone invalide' })
   telephone3?: string;
 
   @ApiPropertyOptional()
@@ -46,14 +46,14 @@ export class CreateClientDto {
   @IsString()
   localisation?: string;
 
-  @ApiPropertyOptional({ example: '123456789' })
+  @ApiPropertyOptional({ example: '123456789 2G3' })
   @IsOptional()
-  @Matches(/^\d{9}$/, { message: 'NINEA doit contenir exactement 9 chiffres' })
+  @Matches(/^[\w\s-]{5,20}$/, { message: 'NINEA invalide (5 à 20 caractères alphanumériques)' })
   ninea?: string;
 
   @ApiPropertyOptional({ example: 'SN-DKR-2024-A-12345' })
   @IsOptional()
-  @Matches(/^SN-\w+-\d{4}-[A-Z]-\d+$/, { message: 'Format RC invalide (ex: SN-DKR-2024-A-12345)' })
+  @Matches(/^[\w\s-]{3,30}$/, { message: 'Format RC invalide' })
   rc?: string;
 
   @ApiPropertyOptional()
