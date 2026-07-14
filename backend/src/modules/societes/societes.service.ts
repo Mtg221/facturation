@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ConflictException,
   ForbiddenException,
@@ -14,6 +15,8 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class SocietesService {
+  private readonly logger = new Logger(SocietesService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
@@ -107,7 +110,11 @@ export class SocietesService {
       dto.email.toLowerCase(),
       dto.prenom,
       passwordSetToken,
-    ).catch(() => {});
+    ).catch((err) => {
+      this.logger.error(
+        `Échec de l'envoi du mail de définition de mot de passe à ${dto.email}: ${err.message}`,
+      );
+    });
 
     return user;
   }
