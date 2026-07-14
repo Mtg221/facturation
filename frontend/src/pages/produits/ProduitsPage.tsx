@@ -5,10 +5,14 @@ import toast from 'react-hot-toast';
 import api from '../../services/api.service';
 import { QUERY_KEYS } from '../../constants/query-keys';
 import { formatCurrency } from '../../utils/format-currency';
+import { ProduitForm } from '../../features/produits/components/ProduitForm';
+import type { Produit } from '../../features/produits/components/ProduitForm';
 
 export function ProduitsPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Produit | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: [...QUERY_KEYS.PRODUITS, search],
@@ -35,7 +39,10 @@ export function ProduitsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Produits & Services</h1>
           <p className="text-gray-500 text-sm mt-1">{data?.meta?.total ?? 0} produit(s)</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#2d5f8a] transition-colors">
+        <button
+          onClick={() => { setEditing(null); setFormOpen(true); }}
+          className="flex items-center gap-2 px-4 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#2d5f8a] transition-colors"
+        >
           <Plus size={16} />
           Nouveau produit
         </button>
@@ -74,7 +81,7 @@ export function ProduitsPage() {
                     ))}
                   </tr>
                 ))
-              : produits.map((p: { id: string; reference: string; designation: string; prix: number; tva: number; unite: string }) => (
+              : produits.map((p: Produit) => (
                   <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-gray-500">{p.reference}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{p.designation}</td>
@@ -83,7 +90,10 @@ export function ProduitsPage() {
                     <td className="px-4 py-3 text-gray-600">{p.unite}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors">
+                        <button
+                          onClick={() => { setEditing(p); setFormOpen(true); }}
+                          className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors"
+                        >
                           <Edit size={15} />
                         </button>
                         <button
@@ -99,6 +109,17 @@ export function ProduitsPage() {
           </tbody>
         </table>
       </div>
+
+      {formOpen && (
+        <ProduitForm
+          produit={editing}
+          onClose={() => setFormOpen(false)}
+          onSuccess={() => {
+            setFormOpen(false);
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUITS });
+          }}
+        />
+      )}
     </div>
   );
 }
