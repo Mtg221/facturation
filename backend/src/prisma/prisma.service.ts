@@ -31,15 +31,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       return next(params);
     });
 
-    // PII Encryption middleware for Client model
+    // PII Encryption middleware.
+    // - Encryption at rest applies to the Client model only.
+    // - Decryption runs on ALL find results and walks nested relations, so
+    //   Client PII loaded indirectly (e.g. facture.include.client, paiement
+    //   .include.facture.client) is decrypted too — not just direct Client
+    //   queries. Without this, relations show raw ciphertext (invoice PDF).
     this.$use(async (params, next) => {
-      // Only apply to Client model for now
-      if (params.model !== 'Client') {
-        return next(params);
-      }
-
-      // Encrypt on create/update
-      if (params.action === 'create' || params.action === 'update' || params.action === 'upsert') {
+      // Encrypt on create/update — Client model only
+      if (
+        params.model === 'Client' &&
+        (params.action === 'create' || params.action === 'update' || params.action === 'upsert')
+      ) {
         const data = params.args.data;
         if (data) {
           for (const field of sensitiveFields) {
@@ -52,39 +55,38 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
       const result = await next(params);
 
-      // Decrypt on find operations
-      if (params.action === 'findUnique' || params.action === 'findFirst' || params.action === 'findMany') {
-        if (result && typeof result === 'object') {
-          const decryptObject = (obj: any) => {
-            if (!obj || typeof obj !== 'object') return obj;
+      // Decrypt on any find operation, traversing nested objects/arrays
+      if (typeof params.action === 'string' && params.action.startsWith('find') && result && typeof result === 'object') {
+        const seen = new Set<unknown>();
+        const decryptObject = (obj: any) => {
+          if (!obj || typeof obj !== 'object' || seen.has(obj)) return;
+          seen.add(obj);
 
-            for (const field of sensitiveFields) {
-              if (obj[field] && typeof obj[field] === 'string' && isEncrypted(obj[field])) {
-                try {
-                  obj[field] = piiEncryptionMiddleware.decrypt(obj[field]);
-                } catch {
-                  // If decryption fails, leave as is (might be unencrypted legacy data)
-                }
+          for (const field of sensitiveFields) {
+            if (obj[field] && typeof obj[field] === 'string' && isEncrypted(obj[field])) {
+              try {
+                obj[field] = piiEncryptionMiddleware.decrypt(obj[field]);
+              } catch {
+                // Not actually encrypted (plaintext on another model, or legacy) — leave as is
               }
             }
-
-            // Handle nested objects and arrays
-            for (const key of Object.keys(obj)) {
-              if (obj[key] && typeof obj[key] === 'object') {
-                if (Array.isArray(obj[key])) {
-                  obj[key].forEach(decryptObject);
-                } else {
-                  decryptObject(obj[key]);
-                }
-              }
-            }
-          };
-
-          if (Array.isArray(result)) {
-            result.forEach(decryptObject);
-          } else {
-            decryptObject(result);
           }
+
+          for (const key of Object.keys(obj)) {
+            if (obj[key] && typeof obj[key] === 'object') {
+              if (Array.isArray(obj[key])) {
+                obj[key].forEach(decryptObject);
+              } else {
+                decryptObject(obj[key]);
+              }
+            }
+          }
+        };
+
+        if (Array.isArray(result)) {
+          result.forEach(decryptObject);
+        } else {
+          decryptObject(result);
         }
       }
 
