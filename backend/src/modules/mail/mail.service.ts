@@ -88,7 +88,7 @@ export class MailService {
   async sendFacture(factureId: string) {
     const facture = await this.prisma.facture.findUnique({
       where: { id: factureId },
-      include: { client: true, details: true, user: true },
+      include: { client: true, details: true, user: true, societe: true },
     });
 
     if (!facture || !facture.client.email) {
@@ -96,8 +96,11 @@ export class MailService {
       return;
     }
 
-    const pdfBuffer = await this.pdfService.generateFacturePdf(facture as Record<string, unknown>);
-    const companyName = this.configService.get('COMPANY_NAME', 'Ma Société');
+    const pdfBuffer = await this.pdfService.generateFacturePdf(
+      facture as Record<string, unknown>,
+      facture.societeId,
+    );
+    const companyName = facture.societe?.nom ?? this.configService.get('COMPANY_NAME', 'Ma Société');
 
     await this.transporter.sendMail({
       from: this.configService.get('MAIL_FROM'),
