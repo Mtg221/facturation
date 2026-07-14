@@ -34,6 +34,13 @@ export interface PlatformStats {
   chiffreAffairesTotal: number;
 }
 
+export interface CreateSocieteAdminInline {
+  email: string;
+  motDePasse: string;
+  nom: string;
+  prenom: string;
+}
+
 export interface CreateSocietePayload {
   nom: string;
   adresse?: string;
@@ -43,6 +50,7 @@ export interface CreateSocietePayload {
   rc?: string;
   banque?: string;
   logoUrl?: string;
+  admin: CreateSocieteAdminInline;
 }
 
 export interface CreateAdminPayload {

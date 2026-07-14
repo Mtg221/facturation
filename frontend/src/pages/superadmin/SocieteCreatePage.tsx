@@ -10,7 +10,10 @@ import { ROUTES } from '../../constants/routes';
 export default function SocieteCreatePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState<CreateSocietePayload>({ nom: '' });
+  const [form, setForm] = useState<CreateSocietePayload>({
+    nom: '',
+    admin: { email: '', motDePasse: '', nom: '', prenom: '' },
+  });
 
   const mutation = useMutation({
     mutationFn: societesService.create,
@@ -24,6 +27,11 @@ export default function SocieteCreatePage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleAdminChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, admin: { ...prev.admin, [name]: value } }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,6 +87,32 @@ export default function SocieteCreatePage() {
         <div>
           <label htmlFor="banque" className={labelCls}>Compte bancaire</label>
           <input id="banque" name="banque" value={form.banque ?? ''} onChange={handleChange} className={inputCls} />
+        </div>
+
+        <div className="border-t border-gray-200 pt-5">
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Administrateur de la société</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="admin-prenom" className={labelCls}>Prénom *</label>
+              <input id="admin-prenom" name="prenom" value={form.admin.prenom} onChange={handleAdminChange} required minLength={2} className={inputCls} />
+            </div>
+            <div>
+              <label htmlFor="admin-nom" className={labelCls}>Nom *</label>
+              <input id="admin-nom" name="nom" value={form.admin.nom} onChange={handleAdminChange} required minLength={2} className={inputCls} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <label htmlFor="admin-email" className={labelCls}>Email *</label>
+              <input id="admin-email" name="email" type="email" value={form.admin.email} onChange={handleAdminChange} required className={inputCls} />
+            </div>
+            <div>
+              <label htmlFor="admin-motDePasse" className={labelCls}>Mot de passe *</label>
+              <input id="admin-motDePasse" name="motDePasse" type="password" value={form.admin.motDePasse} onChange={handleAdminChange} required minLength={8} className={inputCls} />
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-3 pt-2">

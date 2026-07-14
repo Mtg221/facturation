@@ -1,4 +1,22 @@
-import { IsString, IsEmail, IsOptional, MinLength } from 'class-validator';
+import { IsString, IsEmail, IsOptional, MinLength, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CreateSocieteAdminInlineDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  motDePasse: string;
+
+  @IsString()
+  @MinLength(2)
+  nom: string;
+
+  @IsString()
+  @MinLength(2)
+  prenom: string;
+}
 
 export class CreateSocieteDto {
   @IsString()
@@ -32,4 +50,8 @@ export class CreateSocieteDto {
   @IsOptional()
   @IsString()
   logoUrl?: string;
+
+  @ValidateNested()
+  @Type(() => CreateSocieteAdminInlineDto)
+  admin: CreateSocieteAdminInlineDto;
 }

@@ -47,7 +47,31 @@ export class SocietesService {
   }
 
   async create(dto: CreateSocieteDto) {
-    return this.prisma.societe.create({ data: dto });
+    const { admin, ...societeData } = dto;
+
+    const existing = await this.prisma.user.findUnique({
+      where: { email: admin.email.toLowerCase() },
+    });
+    if (existing) throw new ConflictException('Un compte avec cet email existe déjà');
+
+    const motDePasse = await hashPassword(admin.motDePasse);
+
+    return this.prisma.$transaction(async (tx) => {
+      const societe = await tx.societe.create({ data: societeData });
+      await tx.user.create({
+        data: {
+          email: admin.email.toLowerCase(),
+          nom: admin.nom,
+          prenom: admin.prenom,
+          motDePasse,
+          role: 'ADMIN',
+          societeId: societe.id,
+          isActive: true,
+          emailVerified: true,
+        },
+      });
+      return societe;
+    });
   }
 
   async update(id: string, dto: UpdateSocieteDto) {
