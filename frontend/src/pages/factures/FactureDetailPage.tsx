@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Download, Copy, CreditCard, Send, Trash2 } from 'lucide-react';
+import { ArrowLeft, Download, Copy, CreditCard, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useState } from 'react';
 import { facturesService } from '../../services/factures.service';
@@ -67,8 +67,19 @@ export function FactureDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {facture.statut === 'BROUILLON' && (
+            <Link
+              to={`/factures/${facture.id}/modifier`}
+              title="Modifier cette facture (brouillon uniquement)"
+              className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <Pencil size={15} />
+              Modifier
+            </Link>
+          )}
           <button
             onClick={() => facturesService.getPdf(facture.id, facture.numero)}
+            title="Télécharger la facture en PDF"
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <Download size={15} />
@@ -76,6 +87,7 @@ export function FactureDetailPage() {
           </button>
           <button
             onClick={() => duplicateMutation.mutate()}
+            title="Créer une copie de cette facture"
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             <Copy size={15} />

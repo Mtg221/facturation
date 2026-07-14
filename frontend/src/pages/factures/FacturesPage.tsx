@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Eye, Download, Copy, Trash2 } from 'lucide-react';
+import { Plus, Search, Eye, Download, Copy, Trash2, Pencil } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { facturesService } from '../../services/factures.service';
 import { QUERY_KEYS } from '../../constants/query-keys';
@@ -146,18 +146,30 @@ export function FacturesPage() {
                         <div className="flex items-center justify-end gap-1">
                           <Link
                             to={`/factures/${f.id}`}
+                            title="Voir la facture"
                             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
                           >
                             <Eye size={15} />
                           </Link>
+                          {f.statut === 'BROUILLON' && (
+                            <Link
+                              to={`/factures/${f.id}/modifier`}
+                              title="Modifier la facture"
+                              className="p-1.5 rounded-lg hover:bg-amber-50 text-gray-500 hover:text-amber-600 transition-colors"
+                            >
+                              <Pencil size={15} />
+                            </Link>
+                          )}
                           <button
                             onClick={() => facturesService.getPdf(f.id, f.numero)}
+                            title="Télécharger le PDF"
                             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
                           >
                             <Download size={15} />
                           </button>
                           <button
                             onClick={() => duplicateMutation.mutate(f.id)}
+                            title="Dupliquer la facture"
                             className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors"
                           >
                             <Copy size={15} />
@@ -167,6 +179,7 @@ export function FacturesPage() {
                               onClick={() => {
                                 if (confirm('Supprimer cette facture ?')) deleteMutation.mutate(f.id);
                               }}
+                              title="Supprimer la facture"
                               className="p-1.5 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
                             >
                               <Trash2 size={15} />

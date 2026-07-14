@@ -66,6 +66,7 @@ export const router = createBrowserRouter([
       { path: 'produits', element: <ProduitsPage /> },
       { path: 'factures', element: <FacturesPage /> },
       { path: 'factures/nouvelle', element: <FactureCreatePage /> },
+      { path: 'factures/:id/modifier', element: <FactureCreatePage /> },
       { path: 'factures/:id', element: <FactureDetailPage /> },
       { path: 'paiements', element: <PaiementsPage /> },
       { path: 'utilisateurs', element: <UsersPage /> },

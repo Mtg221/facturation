@@ -2,10 +2,10 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useParams } from 'react-router-dom';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { facturesService } from '../../services/factures.service';
 import { clientsService } from '../../services/clients.service';
 import { QUERY_KEYS } from '../../constants/query-keys';
@@ -35,6 +35,14 @@ type FactureFormData = z.infer<typeof factureSchema>;
 export function FactureCreatePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { id } = useParams<{ id: string }>();
+  const isEdit = !!id;
+
+  const { data: facture, isLoading: isLoadingFacture } = useQuery({
+    queryKey: QUERY_KEYS.FACTURE(id!),
+    queryFn: () => facturesService.findOne(id!),
+    enabled: isEdit,
+  });
 
   const { data: clientsData } = useQuery({
     queryKey: QUERY_KEYS.CLIENTS,
@@ -55,6 +63,7 @@ export function FactureCreatePage() {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FactureFormData>({
     resolver: zodResolver(factureSchema),
@@ -65,6 +74,25 @@ export function FactureCreatePage() {
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: 'details' });
+
+  useEffect(() => {
+    if (!facture) return;
+    reset({
+      clientId: facture.clientId,
+      dateEcheance: facture.dateEcheance?.slice(0, 10) ?? '',
+      remiseGlobale: Number(facture.remiseGlobale ?? 0),
+      notes: facture.notes ?? '',
+      conditionsPaiement: facture.conditionsPaiement ?? '',
+      details: (facture.details ?? []).map((d) => ({
+        produitId: d.produitId ?? undefined,
+        designation: d.designation,
+        quantite: Number(d.quantite),
+        prixUnitaire: Number(d.prixUnitaire),
+        tva: Number(d.tva),
+        remise: Number(d.remise ?? 0),
+      })),
+    });
+  }, [facture, reset]);
   const watchedDetails = watch('details');
   const watchedRemise = watch('remiseGlobale');
 
@@ -96,7 +124,20 @@ export function FactureCreatePage() {
     },
   });
 
-  const onSubmit = (data: FactureFormData) => createMutation.mutate(data);
+  const updateMutation = useMutation({
+    mutationFn: (data: FactureFormData) => facturesService.update(id!, data),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FACTURES });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FACTURE(id!) });
+      toast.success(`Facture ${updated.numero} modifiée`);
+      navigate(`/factures/${updated.id}`);
+    },
+  });
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
+
+  const onSubmit = (data: FactureFormData) =>
+    isEdit ? updateMutation.mutate(data) : createMutation.mutate(data);
 
   const clients = clientsData?.data ?? [];
   const produits = produitsData?.data ?? [];
@@ -110,14 +151,37 @@ export function FactureCreatePage() {
     }
   };
 
+  if (isEdit && isLoadingFacture) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (isEdit && facture && facture.statut !== 'BROUILLON') {
+    return (
+      <div className="space-y-4">
+        <p className="text-gray-700">
+          Seules les factures en brouillon peuvent être modifiées.
+        </p>
+        <Link to={`/factures/${facture.id}`} className="text-blue-600 hover:underline text-sm">
+          Retour à la facture
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center gap-3">
-        <Link to="/factures" className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <Link to="/factures" className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Retour à la liste des factures">
           <ArrowLeft size={18} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nouvelle facture</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isEdit ? `Modifier la facture ${facture?.numero ?? ''}` : 'Nouvelle facture'}
+          </h1>
         </div>
       </div>
 
@@ -321,10 +385,14 @@ export function FactureCreatePage() {
           </Link>
           <button
             type="submit"
-            disabled={createMutation.isPending}
+            disabled={isPending}
             className="px-8 py-2.5 bg-[#1e3a5f] text-white text-sm font-medium rounded-lg hover:bg-[#2d5f8a] disabled:opacity-60 transition-colors"
           >
-            {createMutation.isPending ? 'Création...' : 'Créer la facture'}
+            {isPending
+              ? 'Enregistrement...'
+              : isEdit
+                ? 'Enregistrer les modifications'
+                : 'Créer la facture'}
           </button>
         </div>
       </form>
