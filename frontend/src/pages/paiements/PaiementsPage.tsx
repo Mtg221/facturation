@@ -33,7 +33,7 @@ export function PaiementsPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
@@ -92,6 +92,60 @@ export function PaiementsPage() {
                 ))}
           </tbody>
           </table>
+        </div>
+
+        {/* Mobile card list */}
+        <div className="md:hidden divide-y divide-gray-50">
+          {isLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="p-4">
+                  <div className="h-4 w-1/2 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-3 w-1/3 bg-gray-100 rounded animate-pulse mt-2" />
+                </div>
+              ))
+            : paiements.length === 0
+              ? (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    Aucun paiement
+                  </div>
+                )
+              : paiements.map((p: {
+                  id: string;
+                  datePaiement: string;
+                  montant: number;
+                  mode: string;
+                  facture?: { numero: string; client?: { nom: string } };
+                }) => (
+                  <div key={p.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-mono text-xs font-semibold text-gray-700">
+                          {p.facture?.numero ?? '—'}
+                        </div>
+                        <div className="text-gray-700 truncate">{p.facture?.client?.nom ?? '—'}</div>
+                      </div>
+                      <span className="font-semibold text-green-700 shrink-0">
+                        {formatCurrency(Number(p.montant))}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-600">{formatDate(p.datePaiement)}</span>
+                        <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium text-gray-600">
+                          {MODE_LABELS[p.mode] ?? p.mode}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => paiementsService.getRecu(p.id)}
+                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                        title="Télécharger le reçu"
+                      >
+                        <Download size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
         </div>
 
         {meta && meta.totalPages > 1 && (
