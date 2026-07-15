@@ -30,7 +30,7 @@ export function UsersPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
@@ -69,6 +69,44 @@ export function UsersPage() {
                 ))}
           </tbody>
           </table>
+        </div>
+
+        {/* Mobile card list */}
+        <div className="md:hidden divide-y divide-gray-50">
+          {isLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="p-4">
+                  <div className="h-4 w-1/2 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-3 w-1/3 bg-gray-100 rounded animate-pulse mt-2" />
+                </div>
+              ))
+            : users.length === 0
+              ? (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    Aucun utilisateur
+                  </div>
+                )
+              : users.map((u: { id: string; nom: string; prenom: string; email: string; role: string; isActive: boolean; lastLogin?: string }) => (
+                  <div key={u.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-medium text-gray-900 truncate">{u.prenom} {u.nom}</div>
+                        <div className="text-sm text-gray-600 truncate">{u.email}</div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${u.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {u.isActive ? 'Actif' : 'Inactif'}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${ROLE_STYLES[u.role] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {u.role}
+                      </span>
+                      <span className="text-gray-500">
+                        {u.lastLogin ? formatDate(u.lastLogin) : '—'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
         </div>
       </div>
     </div>

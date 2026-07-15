@@ -132,7 +132,7 @@ export function FactureDetailPage() {
 
           {/* Lines */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
@@ -158,6 +158,27 @@ export function FactureDetailPage() {
               </tbody>
               </table>
             </div>
+
+            {/* Mobile card list */}
+            <div className="md:hidden divide-y divide-gray-50">
+              {(facture.details ?? []).map((d) => (
+                <div key={d.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 font-medium text-gray-900">{d.designation}</div>
+                    <span className="font-semibold shrink-0">{formatCurrency(Number(d.montantTTC))}</span>
+                  </div>
+                  {d.observation && (
+                    <div className="text-xs text-gray-500 mt-1">{d.observation}</div>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+                    <span>Qté&nbsp;: {Number(d.quantite)}</span>
+                    <span>Prix HT&nbsp;: {formatCurrency(Number(d.prixUnitaire))}</span>
+                    <span>TVA&nbsp;: {Number(d.tva)}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="flex justify-end p-4 border-t border-gray-100">
               <div className="w-56 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600">

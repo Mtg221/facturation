@@ -83,7 +83,7 @@ export function ReportsPage() {
           )}
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
@@ -111,13 +111,46 @@ export function ReportsPage() {
               </tbody>
               </table>
             </div>
+
+            {/* Mobile card list */}
+            <div className="md:hidden divide-y divide-gray-50">
+              {loadingRevenue
+                ? <div className="p-8 text-center text-gray-400">Chargement...</div>
+                : (revenueData?.factures ?? []).length === 0
+                  ? <div className="p-6 text-center text-sm text-gray-500">Aucune facture</div>
+                  : (revenueData?.factures ?? []).map((f: { id: string; numero: string; client?: { nom: string }; dateEmission: string; montantHT: number; montantTTC: number; montantPaye: number }) => (
+                      <div key={f.id} className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="font-mono text-xs font-semibold">{f.numero}</div>
+                            <div className="text-gray-700 truncate">{f.client?.nom}</div>
+                          </div>
+                          <span className="text-xs text-gray-500 shrink-0">{formatDate(f.dateEmission)}</span>
+                        </div>
+                        <dl className="mt-3 grid grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                          <div>
+                            <dt className="text-xs text-gray-500">HT</dt>
+                            <dd>{formatCurrency(Number(f.montantHT))}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-xs text-gray-500">TTC</dt>
+                            <dd className="font-semibold">{formatCurrency(Number(f.montantTTC))}</dd>
+                          </div>
+                          <div>
+                            <dt className="text-xs text-gray-500">Encaissé</dt>
+                            <dd className="text-green-700 font-semibold">{formatCurrency(Number(f.montantPaye))}</dd>
+                          </div>
+                        </dl>
+                      </div>
+                    ))}
+            </div>
           </div>
         </div>
       )}
 
       {tab === 'impayes' && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto hidden md:block">
             <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
@@ -148,6 +181,32 @@ export function ReportsPage() {
                   ))}
             </tbody>
             </table>
+          </div>
+
+          {/* Mobile card list */}
+          <div className="md:hidden divide-y divide-gray-50">
+            {loadingImpayes
+              ? <div className="p-8 text-center text-gray-400">Chargement...</div>
+              : (impayesData ?? []).length === 0
+                ? <div className="p-6 text-center text-sm text-gray-500">Aucun impayé</div>
+                : (impayesData ?? []).map((f: { id: string; numero: string; client?: { nom: string; telephone1?: string; email?: string }; dateEcheance: string; resteAPayer: number; statut: string }) => (
+                    <div key={f.id} className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-mono text-xs font-semibold">{f.numero}</div>
+                          <div className="font-medium text-gray-900 truncate">{f.client?.nom}</div>
+                          <div className="text-xs text-gray-500 truncate">{f.client?.telephone1 ?? f.client?.email ?? '—'}</div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold shrink-0 ${f.statut === 'EN_RETARD' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {f.statut.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                        <span className="text-gray-500">Échéance {formatDate(f.dateEcheance)}</span>
+                        <span className="font-bold text-red-600">{formatCurrency(Number(f.resteAPayer))}</span>
+                      </div>
+                    </div>
+                  ))}
           </div>
         </div>
       )}
