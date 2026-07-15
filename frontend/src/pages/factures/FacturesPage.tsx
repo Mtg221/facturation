@@ -96,7 +96,7 @@ export function FacturesPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
@@ -191,6 +191,105 @@ export function FacturesPage() {
                   ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile card list */}
+        <div className="md:hidden divide-y divide-gray-50">
+          {isLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="p-4">
+                  <div className="h-4 w-1/2 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-3 w-1/3 bg-gray-100 rounded animate-pulse mt-2" />
+                </div>
+              ))
+            : factures.length === 0
+              ? (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    Aucune facture
+                  </div>
+                )
+              : factures.map((f: Facture) => (
+                  <div key={f.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-mono text-xs font-semibold text-gray-800">
+                          {f.numero}
+                        </div>
+                        <div className="font-medium text-gray-900 truncate">
+                          {f.client?.nom ?? '—'}
+                        </div>
+                      </div>
+                      <span className={`inline-flex shrink-0 items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUT_STYLES[f.statut]}`}>
+                        {STATUT_LABELS[f.statut]}
+                      </span>
+                    </div>
+
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <dt className="text-xs text-gray-500">Émission</dt>
+                        <dd className="text-gray-700">{formatDate(f.dateEmission)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-gray-500">Échéance</dt>
+                        <dd className="text-gray-700">{formatDate(f.dateEcheance)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-gray-500">Montant TTC</dt>
+                        <dd className="font-semibold text-gray-800">{formatCurrency(Number(f.montantTTC))}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-gray-500">Reste à payer</dt>
+                        <dd className={`font-semibold ${Number(f.resteAPayer) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {formatCurrency(Number(f.resteAPayer))}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <div className="mt-3 flex items-center justify-end gap-1 border-t border-gray-50 pt-2">
+                      <Link
+                        to={`/factures/${f.id}`}
+                        title="Voir la facture"
+                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        <Eye size={16} />
+                      </Link>
+                      {f.statut === 'BROUILLON' && (
+                        <Link
+                          to={`/factures/${f.id}/modifier`}
+                          title="Modifier la facture"
+                          className="p-1.5 rounded-lg hover:bg-amber-50 text-gray-500 hover:text-amber-600 transition-colors"
+                        >
+                          <Pencil size={16} />
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => facturesService.getPdf(f.id, f.numero)}
+                        title="Télécharger le PDF"
+                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+                      >
+                        <Download size={16} />
+                      </button>
+                      <button
+                        onClick={() => duplicateMutation.mutate(f.id)}
+                        title="Dupliquer la facture"
+                        className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors"
+                      >
+                        <Copy size={16} />
+                      </button>
+                      {f.statut === 'BROUILLON' && (
+                        <button
+                          onClick={() => {
+                            if (confirm('Supprimer cette facture ?')) deleteMutation.mutate(f.id);
+                          }}
+                          title="Supprimer la facture"
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
         </div>
 
         {meta && meta.totalPages > 1 && (
