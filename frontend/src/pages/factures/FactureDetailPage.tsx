@@ -54,7 +54,7 @@ export function FactureDetailPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link to="/factures" className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
             <ArrowLeft size={18} />
@@ -66,7 +66,7 @@ export function FactureDetailPage() {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {facture.statut === 'BROUILLON' && (
             <Link
               to={`/factures/${facture.id}/modifier`}
@@ -110,7 +110,7 @@ export function FactureDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Header info */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-500">Client</p>
                 <p className="font-semibold text-gray-900">{facture.client?.nom}</p>
@@ -132,7 +132,8 @@ export function FactureDetailPage() {
 
           {/* Lines */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Désignation</th>
@@ -155,7 +156,8 @@ export function FactureDetailPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
             <div className="flex justify-end p-4 border-t border-gray-100">
               <div className="w-56 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600">

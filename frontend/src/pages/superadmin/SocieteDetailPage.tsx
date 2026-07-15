@@ -194,7 +194,7 @@ export default function SocieteDetailPage() {
           {showAdminForm && (
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
               <h3 className="font-semibold text-sm text-blue-800 mb-3">Créer un administrateur</h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   placeholder="Prénom"
                   value={adminForm.prenom}

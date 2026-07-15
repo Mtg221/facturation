@@ -57,7 +57,7 @@ export default function SocieteCreatePage() {
           <input id="nom" name="nom" value={form.nom} onChange={handleChange} required className={inputCls} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="ninea" className={labelCls}>NINEA</label>
             <input id="ninea" name="ninea" value={form.ninea ?? ''} onChange={handleChange} className={inputCls} />
@@ -73,7 +73,7 @@ export default function SocieteCreatePage() {
           <input id="adresse" name="adresse" value={form.adresse ?? ''} onChange={handleChange} className={inputCls} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="telephone" className={labelCls}>Téléphone</label>
             <input id="telephone" name="telephone" value={form.telephone ?? ''} onChange={handleChange} className={inputCls} />
@@ -92,7 +92,7 @@ export default function SocieteCreatePage() {
         <div className="border-t border-gray-200 pt-5">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">Administrateur de la société</h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="admin-prenom" className={labelCls}>Prénom *</label>
               <input id="admin-prenom" name="prenom" value={form.admin.prenom} onChange={handleAdminChange} required minLength={2} className={inputCls} />
@@ -103,7 +103,7 @@ export default function SocieteCreatePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <div>
               <label htmlFor="admin-email" className={labelCls}>Email *</label>
               <input id="admin-email" name="email" type="email" value={form.admin.email} onChange={handleAdminChange} required className={inputCls} />

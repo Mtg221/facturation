@@ -55,7 +55,7 @@ export function ReportsPage() {
 
       {tab === 'revenue' && (
         <div className="space-y-4">
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-wrap gap-4 items-center">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Date début</label>
               <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-400" />
@@ -67,7 +67,7 @@ export function ReportsPage() {
           </div>
 
           {revenueData && (
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Total HT', value: revenueData.synthese.totalHT },
                 { label: 'TVA collectée', value: revenueData.synthese.totalTVA },
@@ -83,7 +83,8 @@ export function ReportsPage() {
           )}
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="text-left px-4 py-3 font-medium text-gray-600">Facture</th>
@@ -108,14 +109,16 @@ export function ReportsPage() {
                       </tr>
                     ))}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
       {tab === 'impayes' && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
                 <th className="text-left px-4 py-3 font-medium text-gray-600">Facture</th>
@@ -144,7 +147,8 @@ export function ReportsPage() {
                     </tr>
                   ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
     </div>

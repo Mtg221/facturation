@@ -87,7 +87,7 @@ export function ProduitForm({ produit, onClose, onSuccess }: ProduitFormProps) {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Référence *</label>
               <input {...register('reference')} className={inputCls} />

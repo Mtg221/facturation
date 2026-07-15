@@ -62,7 +62,7 @@ export default function CompanySettingsPage() {
 
   return (
     <div className="p-8 max-w-2xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
             <Building2 size={20} className="text-blue-600" />
