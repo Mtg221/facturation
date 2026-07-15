@@ -59,7 +59,7 @@ export function ProduitsPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto hidden md:block">
           <table className="w-full min-w-[640px] text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
@@ -109,6 +109,62 @@ export function ProduitsPage() {
                 ))}
           </tbody>
           </table>
+        </div>
+
+        {/* Mobile card list */}
+        <div className="md:hidden divide-y divide-gray-50">
+          {isLoading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="p-4">
+                  <div className="h-4 w-1/2 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-3 w-1/3 bg-gray-100 rounded animate-pulse mt-2" />
+                </div>
+              ))
+            : produits.length === 0
+              ? (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    Aucun produit
+                  </div>
+                )
+              : produits.map((p: Produit) => (
+                  <div key={p.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-mono text-xs text-gray-500">{p.reference}</div>
+                        <div className="font-medium text-gray-900 truncate">{p.designation}</div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          onClick={() => { setEditing(p); setFormOpen(true); }}
+                          className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-500 hover:text-blue-600 transition-colors"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteMutation.mutate(p.id)}
+                          className="p-1.5 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <dl className="mt-3 grid grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                      <div>
+                        <dt className="text-xs text-gray-500">Prix HT</dt>
+                        <dd className="font-medium text-gray-800">{formatCurrency(p.prix)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-gray-500">TVA</dt>
+                        <dd className="text-gray-700">{p.tva}%</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-gray-500">Unité</dt>
+                        <dd className="text-gray-700">{p.unite}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                ))}
         </div>
       </div>
 
