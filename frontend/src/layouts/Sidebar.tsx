@@ -23,28 +23,31 @@ const navItems = [
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
-export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
   const { user, logout } = useAuth();
 
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 h-screen bg-[#1e3a5f] text-white flex flex-col transition-all duration-300 z-50',
-        collapsed ? 'w-16' : 'w-64',
+        'fixed left-0 top-0 h-screen bg-[#1e3a5f] text-white flex flex-col transition-transform lg:transition-all duration-300 z-50',
+        // Width: mobile drawer is always full width; collapse only applies on desktop
+        collapsed ? 'w-64 lg:w-16' : 'w-64',
+        // Off-canvas on mobile, always visible on desktop
+        mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">
-        {!collapsed && (
-          <div>
-            <div className="font-bold text-lg tracking-wide truncate">
-              {user?.societe?.nom ?? 'Facturation'}
-            </div>
-            <div className="text-xs text-white/60">Plateforme de gestion</div>
+        <div className={cn(collapsed && 'lg:hidden')}>
+          <div className="font-bold text-lg tracking-wide truncate">
+            {user?.societe?.nom ?? 'Facturation'}
           </div>
-        )}
+          <div className="text-xs text-white/60">Plateforme de gestion</div>
+        </div>
         <button
           onClick={onToggle}
           className="p-1.5 rounded-lg hover:bg-white/10 transition-colors ml-auto"
@@ -72,12 +75,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   isActive
                     ? 'bg-white/20 text-white'
                     : 'text-white/70 hover:text-white hover:bg-white/10',
-                  collapsed && 'justify-center',
+                  collapsed && 'lg:justify-center',
                 )
               }
+              onClick={onMobileClose}
             >
               <item.icon size={18} className="shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
+              <span className={cn(collapsed && 'lg:hidden')}>{item.label}</span>
             </NavLink>
           );
         })}
@@ -85,29 +89,28 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* User section */}
       <div className="p-3 border-t border-white/10">
-        <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
+        <div className={cn('flex items-center gap-3', collapsed && 'lg:justify-center')}>
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
             <span className="text-xs font-bold">
               {user?.prenom?.[0]}{user?.nom?.[0]}
             </span>
           </div>
-          {!collapsed && (
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium truncate">
-                {user?.prenom} {user?.nom}
-              </div>
-              <div className="text-xs text-white/60 truncate">{user?.role}</div>
+          <div className={cn('flex-1 min-w-0', collapsed && 'lg:hidden')}>
+            <div className="text-sm font-medium truncate">
+              {user?.prenom} {user?.nom}
             </div>
-          )}
-          {!collapsed && (
-            <button
-              onClick={logout}
-              className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-              title="Déconnexion"
-            >
-              <LogOut size={16} />
-            </button>
-          )}
+            <div className="text-xs text-white/60 truncate">{user?.role}</div>
+          </div>
+          <button
+            onClick={logout}
+            className={cn(
+              'p-1.5 rounded-lg hover:bg-white/10 transition-colors',
+              collapsed && 'lg:hidden',
+            )}
+            title="Déconnexion"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </aside>

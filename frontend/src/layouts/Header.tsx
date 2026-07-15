@@ -1,10 +1,14 @@
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../services/api.service';
 import { QUERY_KEYS } from '../constants/query-keys';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const [search, setSearch] = useState('');
 
   const { data: countData } = useQuery({
@@ -17,7 +21,15 @@ export function Header() {
   });
 
   return (
-    <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-40">
+    <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between gap-3 px-4 sm:px-6 sticky top-0 z-40">
+      <button
+        onClick={onMenuClick}
+        className="p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
+        aria-label="Ouvrir le menu"
+      >
+        <Menu size={20} className="text-gray-600" />
+      </button>
+
       <div className="relative flex-1 max-w-sm">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
