@@ -69,10 +69,14 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
   });
 
   const onSubmit = (data: ClientFormData) => {
+    const { raisonSociale, ...payload } = data;
+    const finalNom = raisonSociale ? `${payload.nom} (${raisonSociale})` : payload.nom;
+    const finalData = { ...payload, nom: finalNom };
+
     if (client) {
-      updateMutation.mutate(data);
+      updateMutation.mutate(finalData);
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(finalData);
     }
   };
 
