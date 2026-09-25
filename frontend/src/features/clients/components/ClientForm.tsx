@@ -10,6 +10,7 @@ import type { Client } from '../../../types/client.types';
 
 const clientSchema = z.object({
   nom: z.string().min(1, 'Nom requis'),
+  raisonSociale: z.string().optional(),
   email: z.string().email('Email invalide').optional().or(z.literal('')),
   telephone1: z.string().optional(),
   adresse: z.string().optional(),
@@ -45,6 +46,7 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
     resolver: zodResolver(clientSchema),
     defaultValues: {
       nom: client?.nom ?? '',
+      raisonSociale: '',
       email: client?.email ?? '',
       telephone1: client?.telephone1 ?? '',
       adresse: client?.adresse ?? '',
@@ -91,14 +93,23 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nom * / Raison sociale (optionnel)</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
               <input
                 {...register('nom')}
-                placeholder="Ex: Babacar Ndiaye ou Societe XYZ"
+                placeholder="Ex: Babacar Ndiaye"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-400"
               />
               {errors.nom && <p className="text-red-500 text-xs mt-1">{errors.nom.message}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Raison sociale (optionnel)</label>
+              <input
+                {...register('raisonSociale')}
+                placeholder="Ex: SARL Ets Ndiaye & Frères"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-400"
+              />
             </div>
 
             <div>
