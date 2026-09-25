@@ -60,8 +60,13 @@ export function FactureDetailPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{facture.numero}</h1>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUT_STYLES[facture.statut]}`}>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-gray-900">{facture.numero}</h1>
+              <span className="text-sm font-semibold text-blue-900 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                N° BI : {facture.numero}
+              </span>
+            </div>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold mt-1 ${STATUT_STYLES[facture.statut]}`}>
               {facture.statut.replace('_', ' ')}
             </span>
           </div>

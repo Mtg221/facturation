@@ -92,9 +92,10 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nom / Raison sociale *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nom * / Raison sociale (optionnel)</label>
               <input
                 {...register('nom')}
+                placeholder="Ex: Babacar Ndiaye ou Societe XYZ"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-400"
               />
               {errors.nom && <p className="text-red-500 text-xs mt-1">{errors.nom.message}</p>}
@@ -143,7 +144,7 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">NINEA</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">NINEA (optionnel)</label>
               <input
                 {...register('ninea')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-400"
@@ -151,7 +152,7 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Secteurs d'activité</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Secteurs d'activité (optionnel)</label>
               <select
                 {...register('secteurIds')}
                 multiple
@@ -164,7 +165,7 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Commentaire</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Commentaire (optionnel)</label>
               <textarea
                 {...register('commentaire')}
                 rows={3}
