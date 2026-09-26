@@ -70,13 +70,25 @@ export function ClientForm({ client, onClose, onSuccess }: ClientFormProps) {
 
   const onSubmit = (data: ClientFormData) => {
     const { raisonSociale, ...payload } = data;
-    const finalNom = raisonSociale ? `${payload.nom} (${raisonSociale})` : payload.nom;
-    const finalData = { ...payload, nom: finalNom };
+    const finalNom = raisonSociale?.trim() ? `${payload.nom.trim()} (${raisonSociale.trim()})` : payload.nom.trim();
+
+    // Clean up empty strings for optional fields so backend validators like @Matches or @IsEmail don't fail on ''
+    const cleanPayload: Record<string, unknown> = {
+      ...payload,
+      nom: finalNom,
+    };
+
+    Object.keys(cleanPayload).forEach((key) => {
+      const val = cleanPayload[key];
+      if (typeof val === 'string' && val.trim() === '') {
+        delete cleanPayload[key];
+      }
+    });
 
     if (client) {
-      updateMutation.mutate(finalData);
+      updateMutation.mutate(cleanPayload as unknown as ClientFormData);
     } else {
-      createMutation.mutate(finalData);
+      createMutation.mutate(cleanPayload as unknown as ClientFormData);
     }
   };
 
