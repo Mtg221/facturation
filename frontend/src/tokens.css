@@ -1,0 +1,119 @@
+/**
+ * Design Tokens - Facturation SaaS Platform
+ * Follows the 3-tier token architecture:
+ * Layer 1: Primitive Tokens (raw values)
+ * Layer 2: Semantic Tokens (intent-based aliases)
+ * Layer 3: Component Tokens (scoped component properties)
+ */
+
+:root {
+  /* ==========================================================================
+     LAYER 1: PRIMITIVE TOKENS (Base Palette & Metrics)
+     ========================================================================== */
+  --primitive-navy-950: #0b1727;
+  --primitive-navy-900: #10243e;
+  --primitive-navy-800: #1e3a5f;
+  --primitive-navy-700: #2d588b;
+  --primitive-navy-600: #3b82f6;
+
+  --primitive-blue-500: #2563eb;
+  --primitive-blue-600: #1d4ed8;
+  --primitive-blue-50:  #eff6ff;
+
+  --primitive-emerald-500: #10b981;
+  --primitive-emerald-600: #059669;
+  --primitive-emerald-50:  #ecfdf5;
+
+  --primitive-amber-500: #f59e0b;
+  --primitive-amber-50:  #fffbeb;
+
+  --primitive-rose-600: #dc2626;
+  --primitive-rose-50:  #fef2f2;
+
+  --primitive-slate-50:  #f8fafc;
+  --primitive-slate-100: #f1f5f9;
+  --primitive-slate-200: #e2e8f0;
+  --primitive-slate-300: #cbd5e1;
+  --primitive-slate-400: #94a3b8;
+  --primitive-slate-500: #64748b;
+  --primitive-slate-600: #475569;
+  --primitive-slate-700: #334155;
+  --primitive-slate-800: #1e293b;
+  --primitive-slate-900: #0f172a;
+
+  /* ==========================================================================
+     LAYER 2: SEMANTIC TOKENS (HSL format for Tailwind opacity modifier support)
+     ========================================================================== */
+  /* Canvas & Text */
+  --background: 210 40% 98%;          /* #f8fafc */
+  --foreground: 222 47% 11%;          /* #0f172a */
+
+  /* Surfaces */
+  --card: 0 0% 100%;                  /* #ffffff */
+  --card-foreground: 222 47% 11%;     /* #0f172a */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  /* Brand / Primary (Deep Navy - Trust & Authority) */
+  --primary: 214 52% 25%;             /* #1e3a5f */
+  --primary-foreground: 210 40% 98%;
+
+  /* Secondary (Interactive Blue) */
+  --secondary: 217 91% 60%;           /* #2563eb */
+  --secondary-foreground: 0 0% 100%;
+
+  /* Accent / Paid CTA (Emerald) */
+  --accent: 160 84% 39%;              /* #059669 */
+  --accent-foreground: 0 0% 100%;
+
+  /* Status Colors */
+  --success: 152 76% 36%;             /* #10b981 */
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;              /* #f59e0b */
+  --warning-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;          /* #dc2626 */
+  --destructive-foreground: 210 40% 98%;
+
+  /* Neutrals & Borders */
+  --muted: 210 40% 96%;               /* #f1f5f9 */
+  --muted-foreground: 215 16% 47%;    /* #64748b */
+  --border: 214 32% 91%;              /* #e2e8f0 */
+  --input: 214 32% 91%;
+  --ring: 214 52% 25%;
+
+  /* Metrics */
+  --radius: 0.625rem;                 /* 10px modern soft curve */
+
+  /* ==========================================================================
+     LAYER 3: COMPONENT TOKENS (Scoped Component Specifics)
+     ========================================================================== */
+  --sidebar-bg: #1e3a5f;
+  --sidebar-fg: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-active: rgba(255, 255, 255, 0.16);
+
+  --header-bg: #ffffff;
+  --header-border: #e2e8f0;
+
+  --table-header-bg: #f8fafc;
+  --table-row-hover: #f8fafc;
+}
+
+/* Dark mode semantic overrides */
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  --card: 217 33% 17%;
+  --card-foreground: 210 40% 98%;
+  --popover: 217 33% 17%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 33% 25%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 20%;
+  --muted-foreground: 215 20% 65%;
+  --border: 217 33% 25%;
+  --input: 217 33% 25%;
+  --ring: 217 91% 60%;
+}

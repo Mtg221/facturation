@@ -9,7 +9,7 @@ export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       <Sidebar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((v) => !v)}
@@ -20,7 +20,7 @@ export function AppLayout() {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
@@ -28,13 +28,13 @@ export function AppLayout() {
 
       <div
         className={cn(
-          'transition-all duration-300',
+          'flex-1 flex flex-col transition-all duration-300',
           sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64',
         )}
       >
         <Header onMenuClick={() => setMobileOpen(true)} />
 
-        <main className="p-4 sm:p-6">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
       </div>
