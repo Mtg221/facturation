@@ -51,6 +51,7 @@ jobs:
       JWT_ACCESS_EXPIRATION: 15m
       JWT_REFRESH_EXPIRATION: 7d
       NODE_ENV: test
+      PII_ENCRYPTION_KEY: test_pii_encryption_key_at_least_32_chars_long
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

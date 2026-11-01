@@ -8,7 +8,11 @@ const AUTH_TAG_LENGTH = 16; // 128 bits
 
 // Derive encryption key from environment variable
 function getEncryptionKey(): Buffer {
-  const masterKey = process.env.PII_ENCRYPTION_KEY;
+  const masterKey =
+    process.env.PII_ENCRYPTION_KEY ||
+    (process.env.NODE_ENV === 'test'
+      ? 'test_pii_encryption_key_at_least_32_chars_long'
+      : undefined);
   if (!masterKey) {
     throw new Error('PII_ENCRYPTION_KEY environment variable is required');
   }

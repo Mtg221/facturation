@@ -8,6 +8,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import * as bcryptUtil from '../../common/utils/bcrypt.util';
 
+process.env.PII_ENCRYPTION_KEY = process.env.PII_ENCRYPTION_KEY || 'test_pii_encryption_key_at_least_32_chars_long';
+
 jest.mock('../../common/utils/bcrypt.util');
 
 const mockPrisma = {
