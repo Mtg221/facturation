@@ -24,10 +24,8 @@ jobs:
         working-directory: ${{ matrix.package }}
       - run: npm run lint
         working-directory: ${{ matrix.package }}
-        if: matrix.package == 'backend'
       - run: npm run type-check
         working-directory: ${{ matrix.package }}
-        if: matrix.package == 'backend'
 
   backend-test:
     name: Backend Tests

@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar,
 } from 'recharts';
 import {
-  Users, FileText, CheckCircle, AlertCircle, DollarSign, Plus, ArrowRight,
+  Users, FileText, AlertCircle, DollarSign, Plus, ArrowRight,
 } from 'lucide-react';
 import { dashboardService } from '../services/dashboard.service';
 import { QUERY_KEYS } from '../constants/query-keys';

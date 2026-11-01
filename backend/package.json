@@ -12,7 +12,10 @@
     "seed:prod": "ts-node --transpile-only prisma/seed-prod.ts",
     "start:render": "prisma migrate deploy && ts-node --transpile-only prisma/seed-prod.ts && node dist/main",
     "prisma:generate": "prisma generate",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "lint": "eslint \"src/**/*.ts\"",
+    "type-check": "tsc -p tsconfig.build.json --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -98,5 +101,22 @@
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
   }
 }

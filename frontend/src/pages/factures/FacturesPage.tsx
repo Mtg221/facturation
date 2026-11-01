@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   Plus, Search, Eye, Download, Copy, Trash2, Pencil,
-  FileText, ArrowUpDown, ChevronLeft, ChevronRight, X,
+  FileText, ChevronLeft, ChevronRight, X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { facturesService } from '../../services/factures.service';
